@@ -1,0 +1,74 @@
+{
+ "clip": {
+  "id": "ImpartialGenerousGooseSuperVinlin-l6PLTc6ga-XyWCPO",
+  "url": "https://www.twitch.tv/brohan/clip/ImpartialGenerousGooseSuperVinlin-l6PLTc6ga-XyWCPO",
+  "streamer": "BROHAN",
+  "credit": "twitch.tv/brohan",
+  "twitch_title": "INSANE",
+  "views": 161
+ },
+ "source": "work/runs/2026-11-03_0734/clips/ImpartialGenerousGooseSuperVinlin-l6PLTc6ga-XyWCPO.mp4",
+ "trim": [
+  0.3,
+  22.3
+ ],
+ "cam": [
+  1400,
+  790,
+  520,
+  290
+ ],
+ "game": [
+  576,
+  5,
+  769,
+  940
+ ],
+ "hook": [
+  "BROHAN'S YASUO",
+  "GOES ON A KILLING SPREE"
+ ],
+ "words": "shorts/2026-11-03-brohan-yasuo.words.json",
+ "post": {
+  "title": "Brohan's Yasuo Can't Be Stopped 💀"
+ },
+ "notes": "Yasuo in a river fight: a killing spree (13 s), a double kill (18.7 s); the duo: 'You're so good, Brohan... Brohan, let's go! Sorry, I'll let you focus. I'm going to mute.' A shout near 7 s stays uncaptioned (Whisper's guess was under 0.55). The fight is quiet on the stream (-36 to -43 dBFS): lifted 12 dB between the duo's lines and around the shout at 7 s. The lift stops at 18.4 s, where the double kill gets loud on its own. The stream clips on the shouts (+2.1 dBFS at 7.1 s, +2.6 at 18.6 s) and the duo's lines run hot: shouts 6 dB and lines 4 dB down, the fight 12 dB up; once lifted, the fight's sword hits reach 0 dBFS, so a fast limiter at -6 dBFS shaves them before the mix.",
+ "gains": [
+  [
+   0.0,
+   6.7,
+   12
+  ],
+  [
+   6.75,
+   7.65,
+   -6
+  ],
+  [
+   7.7,
+   12.95,
+   12
+  ],
+  [
+   12.95,
+   14.15,
+   -4
+  ],
+  [
+   14.2,
+   18.4,
+   12
+  ],
+  [
+   18.45,
+   19.35,
+   -6
+  ],
+  [
+   19.35,
+   22.3,
+   -4
+  ]
+ ],
+ "pre_limit_db": -6
+}

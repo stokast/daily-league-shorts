@@ -1,0 +1,53 @@
+{
+ "clip": {
+  "id": "SneakyImportantZucchiniVoteYea-2Mw532pUUMo_wWwl",
+  "url": "https://www.twitch.tv/thebausffs/clip/SneakyImportantZucchiniVoteYea-2Mw532pUUMo_wWwl",
+  "streamer": "Thebausffs",
+  "credit": "twitch.tv/thebausffs",
+  "twitch_title": "ap belveth lets go",
+  "views": 140
+ },
+ "source": "work/runs/2026-11-03_0734/clips/SneakyImportantZucchiniVoteYea-2Mw532pUUMo_wWwl.mp4",
+ "trim": [
+  0.4,
+  18.9
+ ],
+ "cam": [
+  0,
+  780,
+  356,
+  300
+ ],
+ "game": [
+  576,
+  5,
+  769,
+  940
+ ],
+ "hook": [
+  "AP BEL'VETH??",
+  "BAUS MAKES IT WORK"
+ ],
+ "words": "shorts/2026-11-03-baus-ap-belveth.words.json",
+ "post": {
+  "title": "AP Bel'Veth? Baus Makes It Work 🐐"
+ },
+ "notes": "The Infernal Drake, 'We fight now', a teamfight, a double kill, 'Nice'. The play crop stops at y 945, above his own burned-in captions and the HUD. His fight sits about 20 dB under his voice: lifted 8 dB between his lines.",
+ "gains": [
+  [
+   0.0,
+   5.3,
+   8
+  ],
+  [
+   6.7,
+   12.95,
+   8
+  ],
+  [
+   15.95,
+   17.15,
+   8
+  ]
+ ]
+}

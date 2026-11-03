@@ -4,6 +4,7 @@
                                            (work/runs/<UTC time>/clips.json), duplicates of one moment marked
   python -m rift check RUN [--lang en]     download the run's top clips (one per moment) in view order and check
                    [--count 12]            each: contact sheet, webcam, music on stream, speech, unpostable words
+  python -m rift short RECIPE [--draft]    render a short from shorts/<date>-<slug>.json into renders/
 """
 from __future__ import annotations
 
@@ -101,6 +102,10 @@ def main(argv=None) -> None:
     k.add_argument("--count", type=int, default=12)
     k.add_argument("--start", type=int, default=1, help="start from this rank")
     k.set_defaults(func=cmd_check)
+    s = sub.add_parser("short", help="render a short from a recipe")
+    s.add_argument("recipe")
+    s.add_argument("--draft", action="store_true", help="a quick encode to look at")
+    s.set_defaults(func=lambda a: __import__("rift.short", fromlist=["render"]).render(Path(a.recipe), a.draft))
     a = ap.parse_args(argv)
     a.func(a)
 

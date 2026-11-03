@@ -5,3 +5,6 @@ renders/
 sources/
 build/
 .env
+
+# sounds fetched from the editor's pack (never committed)
+assets/

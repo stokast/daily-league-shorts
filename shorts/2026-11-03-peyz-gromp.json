@@ -1,0 +1,78 @@
+{
+ "clip": {
+  "id": "AgitatedBoredBunnyRickroll-qUiBvMYtooZjdcpL",
+  "url": "https://www.twitch.tv/midbeast/clip/AgitatedBoredBunnyRickroll-qUiBvMYtooZjdcpL",
+  "streamer": "midbeast",
+  "credit": "twitch.tv/midbeast",
+  "twitch_title": "Peyz did the thing",
+  "views": 320
+ },
+ "source": "work/runs/2026-11-03_0734/clips/AgitatedBoredBunnyRickroll-qUiBvMYtooZjdcpL.mp4",
+ "trim": [
+  1.2,
+  11.05
+ ],
+ "cam": [
+  1340,
+  798,
+  310,
+  282
+ ],
+ "game": [
+  595,
+  50,
+  610,
+  745
+ ],
+ "hook": [
+  "PEYZ ONE-SHOTS JAX",
+  "THROUGH A GROMP"
+ ],
+ "hook_until": 2.8,
+ "words": "shorts/2026-11-03-peyz-gromp.words.json",
+ "replay": {
+  "from": 4.3,
+  "to": 6.1,
+  "speed": 0.35,
+  "game": [
+   615,
+   50,
+   458,
+   560
+  ],
+  "impact_at": 5.3,
+  "steps": [
+   [
+    4.3,
+    "SPEARS STACK ON THE GROMP"
+   ],
+   [
+    4.85,
+    "Q THROUGH IT"
+   ],
+   [
+    5.2,
+    "THEY ALL JUMP TO JAX"
+   ]
+  ],
+  "riser_db": -12
+ },
+ "post": {
+  "title": "Peyz One-Shots Jax Through a Gromp 🤯"
+ },
+ "notes": "midbeast spectating T1 Peyz (Kalista). The spectator camera keeps Peyz in the middle, so one crop holds the play; the replay slows 4.3-6.1 s to 0.35x on a tighter crop. Both crops start at y 50, under the spectator's score bar, which cluttered the seam. The play is near silent on his stream (-40 to -46 dBFS against -7 to -13 for his shouting): lifted 16 dB until his first word, an impact on the spears bursting on Jax. The replay: a riser (the pack's riser_01) ending on the impact, the slowed game sound at -4 dB.",
+ "gains": [
+  [
+   1.0,
+   6.85,
+   16
+  ]
+ ],
+ "sfx": [
+  [
+   5.3,
+   "impact",
+   -12
+  ]
+ ]
+}

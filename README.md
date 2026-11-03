@@ -28,3 +28,30 @@ Each check writes `checks/<rank>_<clip>.json` and a contact sheet `.jpg` next to
 the webcam (where, full screen, or none), music on stream (`song`, `music` or `none`, from AudioSet tags per 10 s),
 the transcript and its language (Whisper), and words the channel can't post. Downloads land in `clips/`. Picking
 from those signals is a judgment, written down in `CLAUDE.md` ("Choosing clips").
+
+## Making a short
+
+```bash
+python -m rift short shorts/<date>-<slug>.json [--draft]   # -> renders/<slug>.mp4 and renders/<slug>.txt
+```
+
+One JSON recipe per short, in `shorts/` with its word times (`<slug>.words.json`, Whisper large-v3-turbo, English):
+
+| Key | What it sets |
+|---|---|
+| `clip` | id, url, streamer, `credit` (twitch.tv/<channel>, on screen and in every text), Twitch title, views |
+| `source`, `trim` | the downloaded clip and the stretch used, in its seconds |
+| `cam`, `game` | the streamer's cam box in the stream (`null`: no cam) and the play's crop (fitted to the panel around its centre) |
+| `hook`, `hook_until` | two lines over the play for the first seconds |
+| `words` | the word times for the captions |
+| `gains`, `pre_limit_db`, `sfx` | `[from, to, dB]` stretches (quiet game up, clipped shouts down), a fast limiter on the lifted game's hits, `[time, sound, dB]` sounds on the play |
+| `replay` | `from`, `to`, `speed`, a tighter `game` crop, `steps` `[[time, text]]`, `impact_at`, `riser_db` |
+| `post` | the title; the descriptions and captions come from `brand/BRAND.md`'s templates (`rift/post.py`) |
+
+The format: 1080 x 1920; the cam on top (600 px, over a blurred copy where it's narrower), the play below; on the
+seam the Rift Daily tag and the credit pill; captions in the cam's lower part (up to three words, the spoken one in
+gold, swears starred in the text only); an optional slowed replay with numbered steps in the lower third. Sound: one
+static gain to -14 LUFS and a limiter that takes at most 4 dB (a clip with clipped shouts ends a little quieter).
+
+Sounds live in `assets/sfx/` (never committed), copied from the editor's UR.FASTEDITOR pack: `whoosh.ogg` = "336
+SFX/MIX/Swoosh 2.wav", `impact.ogg` = "336 SFX/HITS/Hit.wav", `riser.ogg` = "336 SFX/MIX/QUICK RISER (7).wav".
