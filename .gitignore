@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+work/
+renders/
+sources/
+build/
+.env
