@@ -3,6 +3,10 @@
 League's best clips, one every day, on YouTube Shorts, TikTok and Instagram Reels. One clip per short, the streamer
 credited on screen and in the text, uploaded by hand.
 
+Everything below is also on the brand kit page, with a Save button on each image, a Copy button on each text and the
+per-video captions filled in from a title and a streamer: https://claude.ai/artifact/7igQ9Dhoo4xNDAX1SSHS8D (its
+source is `brand/kit.html`).
+
 ## Identity
 
 | | |
