@@ -3,19 +3,24 @@
 A League of Legends channel on YouTube Shorts, TikTok and Instagram Reels. One clip per short, the streamer credited
 on screen and in the text, uploaded by hand.
 
-The owner asked for other looks (2026-11-03: "give me other logo/rest of the design options, dont like those"):
-four are drawn by `brand/options.py` (A Sticker, B Broadcast, C Arcade, D Street). The owner liked B most and
-asked for more ("i like B the most, but want more options, maybe 2-3 like B + 2-3 more"): round 2 adds B2 Night
-Game, B3 Championship and B4 Daylight in B's spirit, and E Chrome, F Mono and G Esports. The owner leaned to B3 and
-asked for a better logo and the credit on one line ("improve b3s logo, also the "clip" and "twitch.tv/mrbeat" arent
-verticaly aligned"): `python3 brand/options.py b3` draws three logos in polished gold (1 Crest, 2 Medal, 3 Club
-badge), and the seam's words now share one baseline. Then "remove all "league clips" "every day" "leagues clips"
-etc": no image carries a tagline any more (banners, the club badge), and the texts below lost theirs; only the hidden
-search keywords and the hashtags still say league clips. And "also give other options than rift daily": @riftdaily is
-taken on YouTube and TikTok, so `python3 brand/options.py names` draws six names in the B3 look, each with a handle
-that was free on both that day: Riftside (@theriftside), Rift Diffs (@riftdiffs), Outplay Club (@outplayclub),
-Shutdown Gold (@shutdowngold), The Penta Club (@thepentaclub), Full Clear FC (@fullclearfc). This file changes to the
-name and look picked.
+The look and the name are being picked with the owner, round by round (2026-11-03; each round's boards come from
+`python3 brand/options.py <round>`):
+- "give me other logo/rest of the design options, dont like those": A Sticker, B Broadcast, C Arcade, D Street (`1`).
+- "i like B the most, but want more options, maybe 2-3 like B + 2-3 more": B2 Night Game, B3 Championship, B4
+  Daylight, E Chrome, F Mono, G Esports (`2`).
+- "improve b3s logo, also the "clip" and "twitch.tv/mrbeat" arent verticaly aligned": three B3 logos in polished gold
+  (`b3`); the seam's words share one baseline.
+- "remove all "league clips" "every day" "leagues clips" etc": no image or text carries a tagline; only the hidden
+  search keywords and the hashtags still say league clips.
+- "also give other options than rift daily": @riftdaily is taken on YouTube and TikTok; six names in the B3 look
+  (`names`).
+- "make lgoo more league themed, andthose names dont sound like a league clip channel at all": the League look
+  (`league`): navy, Hextech gold, a glowing blue crystal and Cinzel, with three logos (winged crest, hextech crystal,
+  summoner ring); and eight names that say League (`lnames`), each handle free on YouTube and TikTok that day: SoloQ
+  Madness, League Madness, Challenger Plays, LoL Outplays HQ, SoloQ Chaos, Summoner Moments, League Insanity, LoL
+  Highlights HQ.
+
+This file changes to the name and look picked.
 
 Everything below is also on the brand kit page, with a Save button on each image, a Copy button on each text and the
 per-video captions filled in from a title and a streamer: https://claude.ai/artifact/7igQ9Dhoo4xNDAX1SSHS8D (its

@@ -1,10 +1,11 @@
 """Four other looks for Rift Daily, drawn side by side so the owner can pick one (2026-11-03: "give me other
 logo/rest of the design options, dont like those").
 
-    python3 brand/options.py [1] [2] [b3]   # boards in work/brand_options/. Round 1: A Sticker, B Broadcast,
+    python3 brand/options.py [1] [2] [b3] [names] [league] [lnames]   # boards in work/brand_options/. Round 1: A Sticker, B Broadcast,
                                             # C Arcade, D Street. Round 2: B2 Night Game, B3 Championship, B4 Daylight
                                             # (like B), E Chrome, F Mono, G Esports. b3: B3's three logos (crest,
-                                            # medal, club badge). names: other names in the B3 look
+                                            # medal, club badge). names: other names in the B3 look.
+                                            # league / lnames: the League look's logos, and League-sounding names
 
 Each look draws its avatar, wordmark, banner and the short's overlays (credit, tag, captions, hook) on the same
 frame of the Peyz short. Fonts (Google Fonts, OFL/Apache) download to build/fonts/ on first run.
@@ -843,12 +844,16 @@ class Painter:
     def mask(self) -> Image.Image:
         return Image.new("L", (self.w, self.h), 0)
 
-    def add(self, alpha, color) -> None:
+    def add(self, alpha, color, at=(0, 0)) -> None:
+        """Paint `color` (rgb, or an array the alpha's size) through `alpha`, its top left corner at `at`."""
         if isinstance(alpha, Image.Image):
             alpha = np.asarray(alpha, np.float32) / 255
-        al = np.clip(alpha, 0, 1)
-        self.p = np.asarray(color, np.float32) * al[..., None] + self.p * (1 - al[..., None])
-        self.a = al + self.a * (1 - al)
+        x0, y0 = at
+        h, w = alpha.shape
+        al = np.clip(alpha, 0, 1)[..., None]
+        p, a = self.p[y0:y0 + h, x0:x0 + w], self.a[y0:y0 + h, x0:x0 + w]
+        self.p[y0:y0 + h, x0:x0 + w] = np.asarray(color, np.float32) * al + p * (1 - al)
+        self.a[y0:y0 + h, x0:x0 + w] = al[..., 0] + a * (1 - al[..., 0])
 
     def image(self) -> Image.Image:
         a = np.clip(self.a, 0, 1)[..., None]
@@ -1341,6 +1346,302 @@ OPTIONS = [Sticker(), Broadcast(), Arcade(), Street()]
 ROUND2 = [NightGame(), Championship(), Daylight(), Chrome(), Mono(), Esports()]
 
 
+# -- round 3 (2026-11-03: "make lgoo more league themed, andthose names dont sound like a league clip channel at all") --
+# The League client's own look: deep navy, Hextech gold frames, a blue-teal crystal glow, a classical serif for names.
+
+LEAGUE_GOLD = [(0.0, (248, 238, 214)), (0.26, (226, 200, 140)), (0.5, (200, 170, 110)), (0.74, (166, 128, 64)),
+               (1.0, (104, 76, 32))]
+FACETS = ((176, 250, 244), (56, 210, 206), (12, 150, 172), (4, 82, 112))
+
+
+def star4(cx: float, cy: float, r: float, inner: float = 0.2) -> list:
+    """A four-point glint."""
+    return [(cx + (r if i % 2 == 0 else r * inner) * math.cos(math.radians(-90 + 45 * i)),
+             cy + (r if i % 2 == 0 else r * inner) * math.sin(math.radians(-90 + 45 * i))) for i in range(8)]
+
+
+def hexagon_pts(cx: float, cy: float, r: float, flat: bool = False) -> list:
+    a0 = 0 if flat else -90
+    return [(cx + r * math.cos(math.radians(a0 + 60 * i)), cy + r * math.sin(math.radians(a0 + 60 * i)))
+            for i in range(6)]
+
+
+class Hextech:
+    key, name = "L", "Hextech"
+    pitch = "League's own look: navy, Hextech gold and a glowing blue crystal, a classical serif for the name."
+    NAVY, DEEP, GOLD, PALE, DARK_GOLD = (9, 20, 40), (1, 10, 19), (200, 170, 110), (240, 230, 210), (120, 90, 40)
+    TEAL, ICE, BRIGHT = (10, 200, 185), (205, 250, 250), (246, 208, 120)
+    palette = [("Hextech Gold", GOLD), ("Navy", NAVY), ("Crystal", TEAL), ("Pale Gold", PALE)]
+    fonts = "Cinzel · Saira Condensed"
+    LOGOS = {"crest": "Winged crest", "hex": "Hextech crystal", "ring": "Summoner ring"}
+
+    def __init__(self, logo: str = "crest", title: str = "SOLOQ MADNESS", letters: str = "SM"):
+        self.logo, self.title, self.letters = logo, title, letters
+
+    # pieces ---------------------------------------------------------------------------------------------------------
+    def gold(self, P: Painter, m: Image.Image, chamfer: float, outline: float = 0.0) -> None:
+        """Paint a mask in Hextech gold with a chamfered edge, over a dark outline `outline` px wide."""
+        box = m.getbbox()
+        if not box:
+            return
+        pad = int(outline) + 4
+        x0, y0, x1, y1 = max(0, box[0] - pad), max(0, box[1] - pad), min(P.w, box[2] + pad), min(P.h, box[3] + pad)
+        sub = m.crop((x0, y0, x1, y1))
+        if outline:
+            P.add(band(outside(sub), -1, outline), self.DEEP, (x0, y0))
+        if not hasattr(P, "gold_base"):
+            P.gold_base = metal(P.w, P.h, LEAGUE_GOLD, angle=20)
+        d = inside(sub)
+        P.add(band(d, 0), lit(P.gold_base[y0:y1, x0:x1], bevel(d, chamfer, ridge=False), k=0.42), (x0, y0))
+
+    def crystal(self, P: Painter, cx: float, cy: float, w: float, h: float, glow: float = 0.85) -> None:
+        """A faceted crystal: a long rhombus in four lit facets, light edges, a glint and a glow behind."""
+        top, right, bottom, left = (cx, cy - h / 2), (cx + w / 2, cy - h * 0.07), (cx, cy + h / 2), (cx - w / 2, cy - h * 0.07)
+        mid = (cx + w * 0.05, cy - h * 0.1)
+        if glow:
+            g = P.mask()
+            ImageDraw.Draw(g).polygon([top, right, bottom, left], fill=255)
+            P.add(np.asarray(g.filter(ImageFilter.GaussianBlur(w * 0.45)), np.float32) / 255 * glow, self.TEAL)
+        for pts, col in zip([[left, top, mid], [top, right, mid], [left, mid, bottom], [mid, right, bottom]], FACETS):
+            m = P.mask()
+            ImageDraw.Draw(m).polygon(pts, fill=255)
+            P.add(m, col)
+        m = P.mask()
+        d = ImageDraw.Draw(m)
+        for a, b in ((top, mid), (left, mid), (right, mid), (mid, bottom)):
+            d.line([a, b], fill=150, width=max(1, int(w * 0.018)))
+        P.add(m, self.ICE)
+        m = P.mask()
+        ImageDraw.Draw(m).polygon(star4(cx - w * 0.17, cy - h * 0.2, w * 0.15), fill=255)
+        P.add(m, (255, 255, 255))
+
+    def play_crystal(self, P: Painter, cx: float, cy: float, s: float) -> None:
+        """A play button cut from crystal: a triangle in three lit facets."""
+        v0, v1, v2 = (cx - s * 0.42, cy - s * 0.5), (cx + s * 0.58, cy), (cx - s * 0.42, cy + s * 0.5)
+        c0 = (cx - s * 0.08, cy - s * 0.04)
+        g = P.mask()
+        ImageDraw.Draw(g).polygon([v0, v1, v2], fill=255)
+        P.add(np.asarray(g.filter(ImageFilter.GaussianBlur(s * 0.3)), np.float32) / 255 * 0.85, self.TEAL)
+        for pts, col in zip([[v0, v1, c0], [v1, v2, c0], [v2, v0, c0]], (FACETS[0], FACETS[2], FACETS[1])):
+            m = P.mask()
+            ImageDraw.Draw(m).polygon(pts, fill=255)
+            P.add(m, col)
+        m = P.mask()
+        d = ImageDraw.Draw(m)
+        for a in (v0, v1, v2):
+            d.line([a, c0], fill=150, width=max(1, int(s * 0.016)))
+        P.add(m, self.ICE)
+        m = P.mask()
+        ImageDraw.Draw(m).polygon(star4(cx - s * 0.18, cy - s * 0.22, s * 0.13), fill=255)
+        P.add(m, (255, 255, 255))
+
+    def field(self, P: Painter, m: Image.Image, cx: float, cy: float, r: float) -> None:
+        """Navy inside a frame, lit teal from the middle."""
+        y, x = np.mgrid[0:P.h, 0:P.w].astype(np.float32)
+        k = np.clip(1 - np.hypot(x - cx, y - cy) / r, 0, 1)[..., None] ** 1.5
+        col = np.array(self.DEEP, np.float32) + (np.array((12, 70, 90), np.float32) - np.array(self.DEEP, np.float32)) * k
+        P.add(np.asarray(m, np.float32) / 255, col)
+
+    # the three logos -------------------------------------------------------------------------------------------------
+    @staticmethod
+    def blade(B, theta, L, wb, curl, side) -> list:
+        """A curved, tapering blade from base B, `theta` degrees over the horizontal, outward on `side` (-1 left)."""
+        t = math.radians(theta)
+        u = (side * math.cos(t), -math.sin(t))
+        n = (-u[1] * side, u[0] * side) if side < 0 else (u[1], -u[0])
+        n = (n[0], n[1]) if n[1] < 0 else (-n[0], -n[1])          # the normal that points up
+        at = lambda k, j: (B[0] + u[0] * k + n[0] * j, B[1] + u[1] * k + n[1] * j)  # noqa: E731
+        tip = at(L, curl * L)
+        upper = [bez(at(0, wb / 2), at(L * 0.35, wb * 0.6), at(L * 0.75, wb * 0.28 + curl * L * 0.7), tip, i / 24)
+                 for i in range(25)]
+        lower = [bez(tip, at(L * 0.72, -wb * 0.12 + curl * L * 0.55), at(L * 0.3, -wb * 0.45), at(0, -wb / 2), i / 24)
+                 for i in range(25)]
+        return upper + lower
+
+    def crest_mark(self, h: int, small: bool = False) -> Image.Image:
+        """A ranked-style emblem: a crystal in a gold diamond bezel, a crown, swept gold wings."""
+        P = Painter(int(h * 1.34), h)
+        H, cx, cy = P.h, P.w / 2, P.h * 0.5
+        blades = [(40, 0.46, 0.13, 0.4, 0.05), (21, 0.52, 0.13, 0.45, 0.05), (3, 0.47, 0.12, 0.52, 0.04),
+                  (-15, 0.36, 0.11, 0.59, 0.03)]
+        if small:
+            blades = [blades[0], blades[2]]
+        for theta, L, wb, yb, curl in blades:        # back to front, both sides
+            for side in (-1, 1):
+                m = P.mask()
+                ImageDraw.Draw(m).polygon(self.blade((cx + side * H * 0.12, H * yb), theta, H * L, H * wb, curl, side),
+                                          fill=255)
+                self.gold(P, m, H * 0.02, outline=H * 0.009)
+        # the crown: a spike out of the bezel's top and one each side, leaning out; one spike under it
+        m = P.mask()
+        d = ImageDraw.Draw(m)
+        d.polygon([(cx - H * 0.055, H * 0.22), (cx, H * 0.0), (cx + H * 0.055, H * 0.22)], fill=255)
+        for side in (-1, 1):
+            d.polygon([(cx + side * H * 0.07, H * 0.28), (cx + side * H * 0.165, H * 0.085),
+                       (cx + side * H * 0.15, H * 0.34)], fill=255)
+        d.polygon([(cx - H * 0.05, H * 0.84), (cx, H * 1.0), (cx + H * 0.05, H * 0.84)], fill=255)
+        self.gold(P, m, H * 0.014, outline=H * 0.009)
+        # the bezel: a gold diamond ring round a navy well, the crystal in it
+        outer = [(cx, H * 0.13), (cx + H * 0.27, cy), (cx, H * 0.89), (cx - H * 0.27, cy)]
+        m = P.mask()
+        ImageDraw.Draw(m).polygon(outer, fill=255)
+        box = (int(cx - H * 0.3), int(H * 0.1), int(cx + H * 0.3), int(H * 0.92))
+        sub = m.crop(box)
+        P.add(band(outside(sub), -1, H * 0.01), self.DEEP, box[:2])
+        d = inside(sub)
+        ring = H * (0.07 if small else 0.055)
+        P.add(band(d, 0), lit(metal(P.w, P.h, LEAGUE_GOLD, angle=20)[box[1]:box[3], box[0]:box[2]], bevel(d, ring)),
+              box[:2])
+        well = P.mask()
+        well.paste(Image.fromarray((np.clip(d - ring, 0, 1) * 255).astype(np.uint8), "L"), box[:2])
+        self.field(P, well, cx, cy, H * 0.3)
+        self.crystal(P, cx, cy + H * 0.005, H * 0.24, H * 0.5, glow=0.6)
+        return P.image()
+
+    def hex_mark(self, h: int, small: bool = False) -> Image.Image:
+        """A Hextech hexagon: a gold frame and a fine inner line round a crystal play button."""
+        P = Painter(int(h * 0.88), h)
+        H, cx, cy = P.h, P.w / 2, P.h / 2
+        m = P.mask()
+        ImageDraw.Draw(m).polygon(hexagon_pts(cx, cy, H * 0.5), fill=255)
+        d = inside(m)
+        rim = H * (0.085 if small else 0.06)
+        P.add(band(d, 0), lit(metal(P.w, P.h, LEAGUE_GOLD, angle=20), bevel(d, rim)))
+        well = Image.fromarray((np.clip(d - rim, 0, 1) * 255).astype(np.uint8), "L")
+        self.field(P, well, cx, cy, H * 0.42)
+        if not small:
+            P.add(band(d, rim + H * 0.03, rim + H * 0.04), metal(P.w, P.h, LEAGUE_GOLD, angle=20))
+            gm = P.mask()
+            gd = ImageDraw.Draw(gm)
+            for x, y in hexagon_pts(cx, cy, H * 0.5 - rim - H * 0.035)[::3]:
+                gd.polygon([(x, y - H * 0.03), (x + H * 0.02, y), (x, y + H * 0.03), (x - H * 0.02, y)], fill=255)
+            P.add(gm, self.TEAL)
+        self.play_crystal(P, cx + H * 0.02, cy, H * (0.42 if small else 0.36))
+        return P.image()
+
+    def ring_mark(self, h: int, small: bool = False) -> Image.Image:
+        """A summoner-icon ring: a gold border with a spike on top, crystals at the sides, the monogram inside."""
+        P = Painter(h, h)
+        H, c = P.h, P.h / 2
+        R = H * 0.44
+        y, x = np.mgrid[0:H, 0:H].astype(np.float32)
+        d = R - np.hypot(x - c, y - c)
+        rim = H * (0.07 if small else 0.05)
+        well = Image.fromarray((np.clip(d - rim, 0, 1) * 255).astype(np.uint8), "L")
+        self.field(P, well, c, c, R)
+        P.add(band(d, 0, rim), lit(metal(H, H, LEAGUE_GOLD, angle=20), bevel(np.where(d > 0, d, 0), rim)))
+        if not small:
+            m = P.mask()
+            md = ImageDraw.Draw(m)
+            md.polygon([(c - H * 0.07, c - R + H * 0.02), (c, H * 0.0), (c + H * 0.07, c - R + H * 0.02)], fill=255)
+            md.polygon([(c - H * 0.05, c + R - H * 0.02), (c, H * 1.0 - H * 0.005), (c + H * 0.05, c + R - H * 0.02)],
+                       fill=255)
+            for side in (-1, 1):
+                gx = c + side * R
+                md.polygon([(gx, c - H * 0.07), (gx + H * 0.045, c), (gx, c + H * 0.07), (gx - H * 0.045, c)], fill=255)
+            self.gold(P, m, H * 0.012, outline=H * 0.008)
+            for side in (-1, 1):
+                gx = c + side * R
+                self.crystal(P, gx, c, H * 0.045, H * 0.09, glow=0.5)
+        f = gfont("Cinzel", 900, H * (0.36 if small else 0.27) * 100 / 70)
+        g = text(self.letters, f, (255, 255, 255), spacing=0.0).getchannel("A")
+        m = P.mask()
+        m.paste(g, (int(round(c - g.width / 2)), int(round(c - g.height / 2))))
+        self.gold(P, m, H * 0.012, outline=H * 0.009)
+        return P.image()
+
+    def mark(self, h: int, logo: str | None = None, small: bool = False) -> Image.Image:
+        return getattr(self, (logo or self.logo) + "_mark")(h, small)
+
+    # the rest of the look -------------------------------------------------------------------------------------------
+    def wordmark(self, h: int = 200) -> Image.Image:
+        """The name in Cinzel, polished gold over a dark edge."""
+        f = gfont("Cinzel", 900, h)
+        g = text(self.title, f, (255, 255, 255), spacing=0.02).getchannel("A")
+        pad = int(h * 0.12)
+        P = Painter(g.width + 2 * pad, g.height + 2 * pad, K=2)
+        m = P.mask()
+        m.paste(g.resize((g.width * 2, g.height * 2), Image.LANCZOS), (pad * 2, pad * 2))
+        P.add(band(outside(m), -1, h * 0.06), self.DEEP)
+        d = inside(m)
+        grad = fill_gradient(Image.new("RGBA", (P.w, P.h), (0, 0, 0, 255)),
+                             [(0.0, (250, 242, 222)), (0.45, (214, 186, 124)), (0.62, (186, 150, 86)),
+                              (1.0, (120, 88, 38))])
+        base = np.asarray(grad.convert("RGB"), np.float32)
+        P.add(band(d, 0), lit(base, bevel(d, h * 0.03, ridge=False), k=0.35))
+        return P.image()
+
+    def bg(self, w: int, h: int, cx: float, cy: float, r: float, grid: bool = True) -> Image.Image:
+        """Deep navy, a teal light behind the middle, a faint hexagon grid."""
+        y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+        k = np.clip(1 - np.hypot(x - cx, y - cy) / r, 0, 1)[..., None] ** 1.8
+        arr = np.array(self.DEEP, np.float32) + (np.array((10, 56, 72), np.float32) - np.array(self.DEEP, np.float32)) * k
+        im = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
+        if grid:
+            g = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            gd = ImageDraw.Draw(g)
+            s = max(30, w // 30)
+            for row_i, yy in enumerate(range(-s, h + s, int(s * 1.5))):
+                for xx in range(-s, w + s, int(s * 1.732)):
+                    ox = xx + (s * 0.866 if row_i % 2 else 0)
+                    gd.polygon(hexagon_pts(ox, yy, s), outline=self.GOLD + (14,))
+            im.alpha_composite(g)
+        return im
+
+    def avatar(self, s: int = 800, logo: str | None = None) -> Image.Image:
+        logo = logo or self.logo
+        im = self.bg(s, s, s / 2, s / 2, s * 0.62, grid=False)
+        size = {"crest": 0.66, "hex": 0.8, "ring": 0.9}[logo]
+        mk = self.mark(int(s * size), logo)
+        mk = fit(mk, w=int(s * 0.9), h=int(s * size))
+        place(im, soft_shadow(mk, 14, 0.7, 6), s / 2, s / 2, "cm")
+        return im.convert("RGB")
+
+    def lockup(self, h: int = 300, logo: str | None = None, ratio: float = 0.42) -> Image.Image:
+        mk = self.mark(h, logo)
+        wm = fit(self.wordmark(200), h=int(h * ratio))
+        return row([mk, wm], gap=int(h * 0.12))
+
+    def banner(self, logo: str | None = None) -> Image.Image:
+        bw, bh = 2560, 1440
+        im = self.bg(bw, bh, bw / 2, bh / 2, 1200)
+        lk = fit(self.lockup(330, logo, ratio=0.5), w=1500, h=380)
+        place(im, soft_shadow(lk, 12, 0.7, 5), bw / 2, bh / 2, "cm")
+        return im.convert("RGB")
+
+    def overlay(self, frame: Image.Image, logo: str | None = None) -> Image.Image:
+        im = frame.copy()
+        d = ImageDraw.Draw(im, "RGBA")
+        d.rectangle([0, CAM_H - 40, W, CAM_H + 40], fill=self.DEEP + (240,))
+        for y0 in (CAM_H - 40, CAM_H + 38):
+            d.rectangle([0, y0, W, y0 + 2], fill=self.GOLD + (255,))
+        for y0 in (CAM_H - 34, CAM_H + 33):
+            d.rectangle([0, y0, W, y0], fill=self.GOLD + (110,))
+        mk = fit(self.mark(64, logo, small=True), h=64, w=92)
+        place(im, mk, 20, CAM_H, "lm")
+        place_line(im, line([(self.title, gfont("Cinzel", 900, 34), self.PALE, 0.04)]), 20 + mk.width + 12, CAM_H)
+        credit = gfont("Saira Condensed", 700, 38)
+        place_line(im, line([("CLIP", credit, self.TEAL, 0.12), (CREDIT, credit, self.PALE, 0.02)], gap=14),
+                   W - 24, CAM_H, "r")
+        f = gfont("Saira Condensed", 900, 96)
+        words = line([(w, f, self.BRIGHT if i == ACTIVE else (255, 255, 255), 0) for i, w in enumerate(CAPTION)],
+                     gap=22)
+        place_line(im, words, W / 2, CAM_H - 114, "c", shadow=(9, 0.85, 3))
+        f2 = gfont("Saira Condensed", 900, 110)
+        hk = stack([text(HOOK[0], f2, (255, 255, 255)), text(HOOK[1], f2, self.BRIGHT)], gap=8)
+        panel = Image.new("RGBA", (hk.width + 90, hk.height + 64), (0, 0, 0, 0))
+        pd = ImageDraw.Draw(panel)
+        pw, ph = panel.size
+        pd.rectangle([0, 0, pw - 1, ph - 1], fill=self.DEEP + (200,))
+        pd.rectangle([0, 0, pw - 1, ph - 1], outline=self.GOLD + (255,), width=3)
+        pd.rectangle([8, 8, pw - 9, ph - 9], outline=self.GOLD + (90,), width=1)
+        for x0, y0 in ((0, 0), (pw, 0), (0, ph), (pw, ph)):
+            pd.polygon([(x0, y0 - 14), (x0 + 14, y0), (x0, y0 + 14), (x0 - 14, y0)], fill=self.GOLD + (255,))
+        place(panel, hk, pw / 2, ph / 2, "cm")
+        place(im, fit(panel, w=1000), W / 2, CAM_H + 86, "ct")
+        return im
+
+
 # -- boards --------------------------------------------------------------------------------------------------------
 
 def phone(frame: Image.Image, h: int) -> Image.Image:
@@ -1406,32 +1707,35 @@ def overview(frame: Image.Image, options=None) -> Image.Image:
     return im.convert("RGB")
 
 
-def logo_board(frame: Image.Image) -> Image.Image:
-    """B3's three logos side by side: the avatar as the apps crop it, small sizes, the name, the seam, the banner."""
-    o = Championship()
+def logo_board(frame: Image.Image, o=None, title: str = "B3 CHAMPIONSHIP  ·  THREE LOGOS",
+               sub: str = "The colours, type and short overlays stay B3's. On the seam, CLIP and the handle now sit on "
+                          "one baseline.", prefix: str = "B3") -> Image.Image:
+    """A look's three logos side by side: the avatar as the apps crop it, small sizes, the name, the seam, the
+    banner."""
+    o = o or Championship()
     bw, bh, col = 3000, 2130, 1000
     im = Image.new("RGBA", (bw, bh), (22, 22, 24, 255))
-    place(im, text("B3 CHAMPIONSHIP  ·  THREE LOGOS", font("barlow_black", 84), (245, 245, 245)), 60, 50, "lt")
-    place(im, text("The colours, type and short overlays stay B3's. On the seam, CLIP and the handle now sit on one "
-                   "baseline.", font("barlow_bold", 34), (180, 182, 190)), 60, 160, "lt")
+    place(im, text(title, font("barlow_black", 84), (245, 245, 245)), 60, 50, "lt")
+    place(im, text(sub, font("barlow_bold", 34), (180, 182, 190)), 60, 160, "lt")
     for i, (key, label) in enumerate(o.LOGOS.items()):
         cx = col * i + col / 2
         place(im, text(f"{i + 1}  {label.upper()}", font("barlow_black", 64), (245, 245, 245)), cx, 250, "ct")
         av = o.avatar(800, key)
-        av.save(OUT / f"B3-logo-{key}-avatar.png")
+        av.save(OUT / f"{prefix}-logo-{key}-avatar.png")
         place(im, circle(av.resize((560, 560), Image.LANCZOS)), cx, 340, "ct")
         x = cx - (140 + 88 + 56 + 2 * 40) / 2
         for s in (140, 88, 56):
             place(im, circle(av.resize((s, s), Image.LANCZOS)), x, 1000, "lm")
             x += s + 40
-        card = Image.new("RGBA", (920, 250), (11, 11, 11, 255))
+        card = o.bg(920, 250, 200, 125, 520, grid=False) if hasattr(o, "bg") else \
+            Image.new("RGBA", (920, 250), (11, 11, 11, 255))
         place(card, fit(o.lockup(300, key), w=840, h=200), 460, 125, "cm")
         place(im, card, cx, 1120, "ct")
         shot = o.overlay(frame, key)
-        shot.convert("RGB").save(OUT / f"B3-logo-{key}-short.png")
+        shot.convert("RGB").save(OUT / f"{prefix}-logo-{key}-short.png")
         place(im, shot.crop((0, CAM_H - 70, W, CAM_H + 70)).resize((920, 119), Image.LANCZOS), cx, 1410, "ct")
         bn = o.banner(key)
-        bn.save(OUT / f"B3-logo-{key}-banner.png")
+        bn.save(OUT / f"{prefix}-logo-{key}-banner.png")
         place(im, fit(bn.convert("RGBA"), w=920), cx, 1570, "ct")
     return im.convert("RGB")
 
@@ -1467,6 +1771,40 @@ def names_board() -> Image.Image:
     return im.convert("RGB")
 
 
+LEAGUE_NAMES = [  # (name, handle, why); each handle was free on YouTube and TikTok on 2026-11-03
+    ("SOLOQ MADNESS", "soloqmadness", "Solo queue is where the streamers play; the madness is what gets clipped."),
+    ("LEAGUE MADNESS", "leaguemadness", "Says League, and what the clips are."),
+    ("CHALLENGER PLAYS", "challengerplays", "Challenger is the top rank: plays from the best."),
+    ("LoL OUTPLAYS HQ", "loloutplayshq", "The plainest name for it."),
+    ("SOLOQ CHAOS", "soloqchaos", "Outplays, throws and everything in between."),
+    ("SUMMONER MOMENTS", "summonermoments", "Every League player is a summoner."),
+    ("LEAGUE INSANITY", "leagueinsanity", "For the plays that look impossible."),
+    ("LoL HIGHLIGHTS HQ", "lolhighlightshq", "The classic highlight-channel name."),
+]
+
+
+def league_names_board() -> Image.Image:
+    """Names that sound like a League clip channel (2026-11-03: "those names dont sound like a league clip channel at
+    all"), each in the League look with its handle."""
+    bw, bh = 3000, 2000
+    im = Image.new("RGBA", (bw, bh), (22, 22, 24, 255))
+    place(im, text("NAMES THAT SAY LEAGUE  ·  IN THE LEAGUE LOOK", font("barlow_black", 84), (245, 245, 245)), 60, 50,
+          "lt")
+    place(im, text("Each handle was free on YouTube and TikTok on 3 Nov (Instagram can't be checked from here).",
+                   font("barlow_bold", 34), (180, 182, 190)), 60, 160, "lt")
+    for i, (name, handle, why) in enumerate(LEAGUE_NAMES):
+        o = Hextech("crest", name)
+        card = o.bg(1410, 400, 330, 200, 700, grid=False)
+        ImageDraw.Draw(card).rectangle([0, 0, 1409, 399], outline=o.DARK_GOLD + (255,), width=2)
+        place(card, fit(o.lockup(260), w=1330, h=230), 40, 30, "lt")
+        hl = line([("@" + handle, gfont("Saira Condensed", 700, 48), o.GOLD, 0.02),
+                   ("free on YouTube and TikTok", gfont("Saira Condensed", 600, 34), (150, 160, 170), 0.02)], gap=24)
+        place_line(card, hl, 44, 300)
+        place(card, text(why, font("barlow_bold", 32), (214, 220, 226)), 44, 340, "lt")
+        place(im, card, 60 + (i % 2) * 1470, 240 + (i // 2) * 430, "lt")
+    return im.convert("RGB")
+
+
 def main(rounds=("1", "2")):
     OUT.mkdir(parents=True, exist_ok=True)
     frame = base_frame()
@@ -1476,6 +1814,14 @@ def main(rounds=("1", "2")):
     if "names" in rounds:
         names_board().save(OUT / "board-names.jpg", quality=90)
         print("board names")
+    if "league" in rounds:
+        logo_board(frame, Hextech(), "LEAGUE LOOK  ·  THREE LOGOS",
+                   "Navy, Hextech gold and a glowing blue crystal, like the client and the ranked emblems. Shown with "
+                   "SoloQ Madness.", "L").save(OUT / "board-L-logos.jpg", quality=90)
+        print("board League logos")
+    if "lnames" in rounds:
+        league_names_board().save(OUT / "board-league-names.jpg", quality=90)
+        print("board League names")
     if "1" in rounds:
         for o in OPTIONS:
             board(o, frame).save(OUT / f"board-{o.key}-{o.name.lower()}.jpg", quality=90)
