@@ -87,3 +87,10 @@ def test_post_texts_fill_the_title_and_the_streamer_and_keep_the_email_placehold
     assert t["TikTok caption"].startswith("Peyz One-Shots Jax") and "#riftdaily" in t["TikTok caption"]
     monkeypatch.setenv("RIFT_CONTACT_EMAIL", "clips@example.com")
     assert "Email clips@example.com" in post.texts("x", "twitch.tv/y")["YouTube description"]
+
+
+def test_post_texts_carry_no_tagline():
+    # the owner, 2026-11-03: "remove all "league clips" "every day" "leagues clips" etc"
+    for v in post.texts("x", "twitch.tv/y").values():
+        low = v.lower()
+        assert "every day" not in low and "best clip" not in low and "tomorrow" not in low

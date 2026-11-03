@@ -190,32 +190,15 @@ def banner(w: int = 2560, h: int = 1440) -> Image.Image:
     im.alpha_composite(layer(lin_gradient(w, CYAN, GOLD, 90)[:h, :w], wide.point(lambda v: int(v * 0.55))))
     im.alpha_composite(layer(np.broadcast_to(np.array((210, 250, 255), np.float32), (h, w, 3)).copy(),
                              streak.filter(ImageFilter.GaussianBlur(3)).point(lambda v: int(v * 0.5))))
-    # the safe middle: the mark, then the name, the promise and what's in it, as one block centred on it
+    # the safe middle: the mark and the name, centred in it
     sx0, sy0, sw, sh = (w - 1546) // 2, (h - 423) // 2, 1546, 423
     m = mark(380)
-    mx, my = sx0 + 40, sy0 + (sh - m.height) // 2
-    im.alpha_composite(m, (mx, my))
     wm = shadowed(wordmark(140), 14, 0.8, 6)
-    tag = "LEAGUE'S BEST CLIPS  \u00b7  EVERY DAY"
-    f = font("ChakraPetch-SemiBold.ttf", 50)
-    tg = Image.new("RGBA", (int(f.getlength(tag)) + 40, 90), (0, 0, 0, 0))
-    ImageDraw.Draw(tg).text((20, 10), tag, font=f, fill=GOLD)
-    tg = shadowed(tg.crop(tg.getbbox()), 8, 0.7, 3)
-    pill_t = "OUTPLAYS  \u00b7  PENTAS  \u00b7  THROWS"
-    fp = font("ChakraPetch-Bold.ttf", 32)
-    pw, ph = int(fp.getlength(pill_t)) + 56, 62
-    pill = Image.new("RGBA", (pw, ph), (0, 0, 0, 0))
-    pd = ImageDraw.Draw(pill)
-    pd.rounded_rectangle([0, 0, pw - 1, ph - 1], radius=ph // 2, fill=CYAN + (255,))
-    pd.text((pw / 2, ph / 2), pill_t, font=fp, fill=NAVY, anchor="mm")
-    pad_wm, pad_tg = 14 * 3 + 6, 8 * 3 + 3  # the shadows' own margins round each picture
-    block = (wm.height - 2 * pad_wm) + 18 + (tg.height - 2 * pad_tg) + 30 + ph
-    top = sy0 + (sh - block) // 2
-    tx = mx + m.width + 30
-    im.alpha_composite(wm, (tx - pad_wm, top - pad_wm))
-    y2 = top + wm.height - 2 * pad_wm + 18
-    im.alpha_composite(tg, (tx - pad_tg + 4, y2 - pad_tg))
-    im.alpha_composite(pill, (tx + 6, y2 + tg.height - 2 * pad_tg + 30))
+    pad_wm = 14 * 3 + 6  # the shadow's own margin round the name
+    total = m.width + 40 + wm.width - 2 * pad_wm
+    mx = sx0 + (sw - total) // 2
+    im.alpha_composite(m, (mx, sy0 + (sh - m.height) // 2))
+    im.alpha_composite(wm, (mx + m.width + 40 - pad_wm, sy0 + (sh - (wm.height - 2 * pad_wm)) // 2 - pad_wm))
     return im.convert("RGB")
 
 

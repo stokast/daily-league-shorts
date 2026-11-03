@@ -4,7 +4,7 @@ logo/rest of the design options, dont like those").
     python3 brand/options.py [1] [2] [b3]   # boards in work/brand_options/. Round 1: A Sticker, B Broadcast,
                                             # C Arcade, D Street. Round 2: B2 Night Game, B3 Championship, B4 Daylight
                                             # (like B), E Chrome, F Mono, G Esports. b3: B3's three logos (crest,
-                                            # medal, club badge)
+                                            # medal, club badge). names: other names in the B3 look
 
 Each look draws its avatar, wordmark, banner and the short's overlays (credit, tag, captions, hook) on the same
 frame of the Peyz short. Fonts (Google Fonts, OFL/Apache) download to build/fonts/ on first run.
@@ -272,10 +272,6 @@ class Sticker:
         im = halftone(bw, bh, self.PINK, self.PINK_D, 44, bw * 0.75, bh * 0.85, 13).convert("RGBA")
         st = fit(self.sticker(["RIFT", "DAILY"], 300), h=380)
         place(im, st, 540, 720, "lm")
-        tape = self.tape("LEAGUE'S BEST CLIPS · EVERY DAY", 54, self.INK, self.YELLOW, tilt=-2.5)
-        place(im, tape, 540 + st.width + 40, 650, "lm")
-        tape2 = self.tape("OUTPLAYS · PENTAS · THROWS", 40, self.YELLOW, self.INK, tilt=1.5)
-        place(im, tape2, 540 + st.width + 70, 790, "lm")
         return im.convert("RGB")
 
     def tape(self, t, size, bg, fg, tilt=-2.0):
@@ -353,8 +349,6 @@ class Broadcast:
         wm = fit(self.wordmark(220), w=1100)
         place(im, wm, 560 + 300 + 60, 690, "lb")
         d.rectangle([560 + 360, 708, 560 + 360 + 1100, 716], fill=self.SIGNAL)
-        tag = text("LEAGUE'S BEST CLIPS — EVERY DAY", font("barlow_sc", 52), self.SLATE, spacing=0.12)
-        place(im, tag, 560 + 360, 740, "lt")
         return im.convert("RGB")
 
     def overlay(self, frame: Image.Image) -> Image.Image:
@@ -468,7 +462,6 @@ class Arcade:
             sd.rectangle([0, y, 520, y + 6 + i * 2], fill=(0, 0, 0, 0))
         place(im, sun, bw / 2, 900, "cb")
         place(im, fit(self.wordmark(240), w=1080), bw / 2 + 110, 660, "cm")
-        place(im, text("NEW CLIP EVERY DAY", font("press", 34), self.CREAM), bw / 2, 805, "cm")
         place(im, self.coin(190), bw / 2 - 540, 660, "cm")
         return im.convert("RGB")
 
@@ -579,7 +572,6 @@ class Street:
                                     joint="curve")
         im.alpha_composite(swoosh.filter(ImageFilter.GaussianBlur(3)))
         place(im, fit(text("RIFT DAILY", font("marker", 260), self.INK), w=1250), 1280, 690, "cm")
-        place(im, self.tape("LEAGUE'S BEST CLIPS. EVERY DAY.", 52, tilt=-2), 1280, 860, "cm")
         place(im, rotate(self.crown(170), -10), 610, 520, "cm")
         return im.convert("RGB")
 
@@ -672,8 +664,6 @@ class NightGame:
         place(im, b, 560, 720, "lm")
         wm = fit(self.wordmark(230), w=1060)
         place(im, wm, 560 + b.width + 50, 700, "lb")
-        tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Barlow Semi Condensed", 600, 50), self.STEEL, spacing=0.12)
-        place(im, tag, 560 + b.width + 70, 735, "lt")
         return im.convert("RGB")
 
     def overlay(self, frame):
@@ -875,8 +865,8 @@ class Championship:
     fonts = "Graduate · Saira Condensed"
     LOGOS = {"crest": "Crest", "medal": "Medal", "club": "Club badge"}
 
-    def __init__(self, logo: str = "crest"):
-        self.logo = logo
+    def __init__(self, logo: str = "crest", title: str = "RIFT DAILY", letters: str = "RD"):
+        self.logo, self.title, self.letters = logo, title, letters
 
     # the logo ----------------------------------------------------------------------------------------------------
     def mark(self, h: int, logo: str | None = None, small: bool = False) -> Image.Image:
@@ -890,10 +880,10 @@ class Championship:
         return np.broadcast_to(top + (bottom - top) * ys ** 0.8, (P.h, P.w, 3))
 
     def monogram(self, P: Painter, cx: float, cy: float, cap: float, fill=None, varsity: bool = True) -> None:
-        """RD in Graduate, capitals `cap` px tall (painter scale), centred on (cx, cy): polished gold with a
-        chamfer and a varsity outline (gold letters, a black gap, a thin gold line), or flat `fill`."""
-        f = gfont("Graduate", 400, cap * 100 / 75)
-        g = text("RD", f, (255, 255, 255), spacing=0.03).getchannel("A")
+        """The monogram (RD) in Graduate, capitals `cap` px tall (painter scale), centred on (cx, cy): polished
+        gold with a chamfer and a varsity outline (gold letters, a black gap, a thin gold line), or flat `fill`."""
+        f = gfont("Graduate", 400, cap * 100 / 75 * (1.25 if len(self.letters) == 1 else 1))
+        g = text(self.letters, f, (255, 255, 255), spacing=0.03).getchannel("A")
         m = P.mask()
         m.paste(g, (int(round(cx - g.width / 2)), int(round(cy - g.height / 2))))
         if fill is not None:
@@ -984,18 +974,18 @@ class Championship:
             m = P.mask()
             f = gfont("Saira Condensed", 800, H * 0.078)
             r = c - (o + b1) / 2
-            arc_text(m, "RIFT DAILY", f, c, c, r, top=True, spacing=0.17)
-            arc_text(m, "LEAGUE CLIPS", f, c, c, r, top=False, spacing=0.17)
+            arc_text(m, self.title, f, c, c, r, top=True, spacing=0.17)
             sd = ImageDraw.Draw(m)
-            for sx in (c - r, c + r):
-                sd.polygon(star_pts(sx, c, H * 0.03), fill=255)
+            for k in (-1, 0, 1):
+                a = math.pi / 2 + k * 0.36
+                sd.polygon(star_pts(c + r * math.cos(a), c + r * math.sin(a), H * (0.04 if k == 0 else 0.03)), fill=255)
             P.add(m, gold)
         self.monogram(P, c, c, H * (0.24 if small else 0.2), fill=self.BLACK)
         return P.image()
 
     # the rest of the look ---------------------------------------------------------------------------------------
     def wordmark(self, h=210):
-        wm = text("RIFT DAILY", gfont("Saira Condensed", 900, h), self.WHITE, spacing=0.03)
+        wm = text(self.title, gfont("Saira Condensed", 900, h), self.WHITE, spacing=0.03)
         im = Image.new("RGBA", (wm.width, wm.height + int(h * 0.36)), (0, 0, 0, 0))
         d = ImageDraw.Draw(im)
         im.alpha_composite(wm, (0, int(h * 0.18)))
@@ -1032,9 +1022,7 @@ class Championship:
         x0 = (bw - (mk.width + 80 + wm.width)) / 2
         place(im, soft_shadow(mk, 10, 0.7, 5), x0 - 35, 720, "lm")
         x = x0 + mk.width + 80
-        place(im, wm, x, 690, "lm")
-        tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Saira Condensed", 600, 50), self.GOLD, spacing=0.16)
-        place(im, tag, x, 690 + wm.height / 2 + 30, "lt")
+        place(im, wm, x, 720, "lm")
         return im.convert("RGB")
 
     def overlay(self, frame, logo=None):
@@ -1046,7 +1034,7 @@ class Championship:
         mk = self.mark(62, logo, small=True)
         place(im, mk, 22, CAM_H, "lm")
         name = gfont("Saira Condensed", 800, 40)
-        place_line(im, line([("RIFT DAILY", name, self.WHITE, 0.05)]), 22 + mk.width + 14, CAM_H)
+        place_line(im, line([(self.title, name, self.WHITE, 0.05)]), 22 + mk.width + 14, CAM_H)
         credit = gfont("Saira Condensed", 700, 40)
         place_line(im, line([("CLIP", credit, self.GOLD, 0.12), (CREDIT, credit, self.WHITE, 0.02)], gap=16),
                    W - 26, CAM_H, "r")
@@ -1111,8 +1099,6 @@ class Daylight:
         place(im, r, 580, 720, "lm")
         wm = fit(self.wordmark(220), w=1050)
         place(im, wm, 580 + 300 + 60, 700, "lb")
-        tag = text("LEAGUE'S BEST CLIPS — EVERY DAY", gfont("Barlow Semi Condensed", 600, 50), self.GREY, spacing=0.12)
-        place(im, tag, 580 + 300 + 64, 735, "lt")
         return im.convert("RGB")
 
     def boxed(self, t, f, fg, bg, padx=18, pady=10):
@@ -1190,8 +1176,6 @@ class Chrome:
         place(im, wm, bw / 2, 690, "cm")
         place(im, self.sparkle(130), bw / 2 + wm.width / 2 - 30, 690 - wm.height / 2 + 10, "cm")
         place(im, self.sparkle(70), bw / 2 - wm.width / 2 + 40, 690 + wm.height / 2 - 20, "cm")
-        tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Unbounded", 500, 38), self.SILVER, spacing=0.14)
-        place(im, tag, bw / 2, 690 + wm.height / 2 + 50, "ct")
         return im.convert("RGB")
 
     def overlay(self, frame):
@@ -1248,7 +1232,6 @@ class Mono:
         im = Image.new("RGBA", (bw, bh), self.WHITE + (255,))
         wm = fit(text("rift daily.", self.f(300), self.BLACK), w=1400)
         place(im, wm, 580, 700, "lb")
-        place(im, text("league's best clips. every day.", self.f(56, 500), self.GREY), 586, 740, "lt")
         return im.convert("RGB")
 
     def label(self, t, size=34, fg=None, bg=None):
@@ -1328,8 +1311,6 @@ class Esports:
         place(im, c, 580, 720, "lm")
         wm = fit(self.wordmark(220), w=1100)
         place(im, wm, 580 + c.width + 50, 700, "lb")
-        tag = text("LEAGUE'S BEST CLIPS  //  EVERY DAY", gfont("Teko", 600, 64), self.STEEL, spacing=0.08)
-        place(im, tag, 580 + c.width + 64, 742, "lt")
         return im.convert("RGB")
 
     def overlay(self, frame):
@@ -1455,12 +1436,46 @@ def logo_board(frame: Image.Image) -> Image.Image:
     return im.convert("RGB")
 
 
+NAMES = [  # (name, monogram, handle, why); each handle was free on YouTube and TikTok on 2026-11-03
+    ("RIFTSIDE", "RS", "theriftside", "Courtside, for the Rift: the best seat for the best plays."),
+    ("RIFT DIFFS", "RD", "riftdiffs", "League slang for outclassing someone (\"jungle diff\"). Keeps the RD crest."),
+    ("OUTPLAY CLUB", "OC", "outplayclub", "Says what's in every video."),
+    ("SHUTDOWN GOLD", "SG", "shutdowngold", "The bounty for killing someone who's fed, and the brand's gold."),
+    ("THE PENTA CLUB", "5", "thepentaclub", "Five kills, one crest: the plays everyone wants to hit."),
+    ("FULL CLEAR FC", "FC", "fullclearfc", "A jungle term, with a football club's crest."),
+]
+
+
+def names_board() -> Image.Image:
+    """Other names than Rift Daily (2026-11-03: "also give other options than rift daily"), each as B3's crest
+    and wordmark, with its handle."""
+    bw, bh = 3000, 1830
+    im = Image.new("RGBA", (bw, bh), (22, 22, 24, 255))
+    place(im, text("NAME OPTIONS  ·  IN THE B3 LOOK", font("barlow_black", 84), (245, 245, 245)), 60, 50, "lt")
+    place(im, text("@riftdaily is taken on YouTube and TikTok. Each handle below was free on both on 3 Nov "
+                   "(Instagram can't be checked from here).", font("barlow_bold", 34), (180, 182, 190)), 60, 160, "lt")
+    for i, (name, letters, handle, why) in enumerate(NAMES):
+        o = Championship("crest", name, letters)
+        card = Image.new("RGBA", (1410, 480), (12, 12, 12, 255))
+        ImageDraw.Draw(card).rectangle([0, 0, 1409, 479], outline=(46, 44, 40, 255), width=2)
+        place(card, fit(o.lockup(300), w=1300, h=250), 50, 40, "lt")
+        hl = line([("@" + handle, gfont("Saira Condensed", 700, 50), o.GOLD, 0.02),
+                   ("free on YouTube and TikTok", gfont("Saira Condensed", 600, 36), o.GREY, 0.02)], gap=26)
+        place_line(card, hl, 52, 352)
+        place(card, text(why, font("barlow_bold", 34), (205, 203, 196)), 52, 400, "lt")
+        place(im, card, 60 + (i % 2) * 1470, 240 + (i // 2) * 530, "lt")
+    return im.convert("RGB")
+
+
 def main(rounds=("1", "2")):
     OUT.mkdir(parents=True, exist_ok=True)
     frame = base_frame()
     if "b3" in rounds:
         logo_board(frame).save(OUT / "board-B3-logos.jpg", quality=90)
         print("board B3 logos")
+    if "names" in rounds:
+        names_board().save(OUT / "board-names.jpg", quality=90)
+        print("board names")
     if "1" in rounds:
         for o in OPTIONS:
             board(o, frame).save(OUT / f"board-{o.key}-{o.name.lower()}.jpg", quality=90)

@@ -1,7 +1,7 @@
 # Rift Daily
 
-League's best clips, one every day, on YouTube Shorts, TikTok and Instagram Reels. One clip per short, the streamer
-credited on screen and in the text, uploaded by hand.
+A League of Legends channel on YouTube Shorts, TikTok and Instagram Reels. One clip per short, the streamer credited
+on screen and in the text, uploaded by hand.
 
 The owner asked for other looks (2026-11-03: "give me other logo/rest of the design options, dont like those"):
 four are drawn by `brand/options.py` (A Sticker, B Broadcast, C Arcade, D Street). The owner liked B most and
@@ -9,7 +9,13 @@ asked for more ("i like B the most, but want more options, maybe 2-3 like B + 2-
 Game, B3 Championship and B4 Daylight in B's spirit, and E Chrome, F Mono and G Esports. The owner leaned to B3 and
 asked for a better logo and the credit on one line ("improve b3s logo, also the "clip" and "twitch.tv/mrbeat" arent
 verticaly aligned"): `python3 brand/options.py b3` draws three logos in polished gold (1 Crest, 2 Medal, 3 Club
-badge), and the seam's words now share one baseline. This file changes to the one picked.
+badge), and the seam's words now share one baseline. Then "remove all "league clips" "every day" "leagues clips"
+etc": no image carries a tagline any more (banners, the club badge), and the texts below lost theirs; only the hidden
+search keywords and the hashtags still say league clips. And "also give other options than rift daily": @riftdaily is
+taken on YouTube and TikTok, so `python3 brand/options.py names` draws six names in the B3 look, each with a handle
+that was free on both that day: Riftside (@theriftside), Rift Diffs (@riftdiffs), Outplay Club (@outplayclub),
+Shutdown Gold (@shutdowngold), The Penta Club (@thepentaclub), Full Clear FC (@fullclearfc). This file changes to the
+name and look picked.
 
 Everything below is also on the brand kit page, with a Save button on each image, a Copy button on each text and the
 per-video captions filled in from a title and a streamer: https://claude.ai/artifact/7igQ9Dhoo4xNDAX1SSHS8D (its
@@ -20,9 +26,7 @@ source is `brand/kit.html`).
 | | |
 |---|---|
 | Name | **Rift Daily** |
-| Display name (where there is room) | **Rift Daily · League Clips** |
-| Handle (all three) | **@riftdaily** (taken? `@riftdailyclips`, then `@rift.daily` on TikTok/IG) |
-| Tagline | **League's best clips. Every day.** |
+| Handle (all three) | **@riftdaily**: taken on YouTube and TikTok (checked 2026-11-03), so the name is being picked again |
 | Voice | a player talking to players: short, hyped when it's earned, never cringe; the clip is the star, its creator always credited |
 
 **Colours**
@@ -31,7 +35,7 @@ source is `brand/kit.html`).
 |---|---|---|
 | Rift Night | `#0A0F1E` | backgrounds, the credit tag |
 | Rift Cyan | `#18E6FF` | the primary: "DAILY", highlights, the tag's edge |
-| Hextech Gold | `#F5C542` | the accent: taglines, "CLIP" |
+| Hextech Gold | `#F5C542` | the accent: "CLIP" |
 | Mist | `#A0B2D2` | secondary text on navy |
 | White | `#F4F7FF` | text |
 
@@ -46,7 +50,7 @@ the middle: clips, from the Rift. Drawn by `brand/make_brand.py` (any size).
 | File | Where it goes |
 |---|---|
 | `rift-daily-avatar-800.png` | profile picture on YouTube, TikTok and Instagram (all crop it to a circle: the mark sits inside it) |
-| `rift-daily-youtube-banner-2560x1440.png` | YouTube banner (Customisation > Branding); the name, tagline and pill sit in the 1546 x 423 middle every device shows |
+| `rift-daily-youtube-banner-2560x1440.png` | YouTube banner (Customisation > Branding); the mark and the name sit in the 1546 x 423 middle every device shows |
 | `rift-daily-youtube-watermark-150.png` | YouTube video watermark (Customisation > Branding > Video watermark, "Entire video") |
 | `rift-daily-mark-2048.png`, `-512.png` | the mark alone, transparent: anywhere else (Discord, a website, a sticker) |
 | `rift-daily-wordmark.png` | the name alone, transparent |
@@ -59,10 +63,10 @@ the middle: clips, from the Rift. Drawn by `brand/make_brand.py` (any size).
 - **Channel name**: Rift Daily · **Handle**: @riftdaily
 - **Description** (Customisation > Basic info):
 
-> The best League of Legends clips, one every day. Outplays, pentakills, throws and the moments you have to watch
-> twice, picked from Twitch, Reddit and the community.
+> Outplays, pentakills, throws: the League of Legends moments you have to watch twice, picked from Twitch, Reddit and
+> the community.
 >
-> New clip every day. Subscribe so you never miss one.
+> Subscribe so you don't miss the next one.
 >
 > Every clip belongs to its creator and is credited in the video and in its description. Streamers: if you'd like a
 > clip credited differently or taken down, email CONTACT_EMAIL and it's done within 24 hours.
@@ -80,18 +84,18 @@ the middle: clips, from the Rift. Drawn by `brand/make_brand.py` (any size).
   from the keywords, Category **Gaming**, language **English**, comments on.
 
 ### TikTok
-- **Name**: Rift Daily · League Clips · **Username**: riftdaily
-- **Bio** (80 characters max): `League's best clips, every day ⚡ All clips credited · DM for removal`
+- **Name**: Rift Daily · **Username**: riftdaily
+- **Bio** (80 characters max): `League of Legends outplays, pentas & throws ⚡ Clips credited · DM for removal`
 - **Photo**: the avatar. A personal account is enough (business accounts lose most of the sound library).
 - **Each post**: comments, Duet and Stitch on; who can watch: everyone.
 
 ### Instagram
-- **Name**: Rift Daily · League Clips · **Username**: riftdaily
+- **Name**: Rift Daily · **Username**: riftdaily
 - **Bio** (150 characters max):
   ```
-  League of Legends' best clips, every day ⚡
-  Outplays, pentas & throws from Twitch
-  All clips credited · DM for credit or removal
+  League of Legends outplays, pentas & throws ⚡
+  Straight from Twitch, every clip credited
+  DM for credit or removal
   ```
 - **Account**: Professional > Creator, category "Gaming video creator". **Link**: the YouTube channel.
 - **Each reel**: "Also share to feed" on; topics League of Legends, Gaming, Esports.
@@ -109,7 +113,7 @@ Case, the player's name when they're known, then one emoji that fits the moment,
 ```
 🎥 Clip: twitch.tv/STREAMER (go follow!)
 
-⚡ Rift Daily: League's best clip, every day. Subscribe for tomorrow's.
+⚡ Subscribe to Rift Daily for the next one.
 
 All clips belong to their creators. Streamers: want this one credited differently or taken down? Email CONTACT_EMAIL and it's handled within 24h. Not endorsed by Riot Games.
 
@@ -129,15 +133,15 @@ TITLE
 TITLE
 
 🎥 twitch.tv/STREAMER
-Follow @riftdaily for one every day ⚡
+Follow @riftdaily for the next one ⚡
 #leagueoflegends #lol #leagueclips #gaming #esports
 ```
 
 `CONTACT_EMAIL` is set once (in the upload default and the channel description), never per video.
 
 ## Posting
-- One clip a day, the same hour every day; the same file on all three, uploaded natively (never a TikTok download
-  with its watermark onto Reels or Shorts).
+- Post at the same hour each time; the same file on all three, uploaded natively (never a TikTok download with its
+  watermark onto Reels or Shorts).
 - A good slot to start: 6 pm US Eastern (midnight in central Europe), when both NA and EU players are online. Move it
   once the analytics show when your viewers watch.
 

@@ -56,6 +56,8 @@ skipped as "too small to read on a phone" (2026-11-03).
 - Twitch credentials come from the environment only (`TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`). Never print, log or
   commit them, and never ask for them in chat.
 - Every clip credits its streamer on screen and in every text. Skip clips with music playing on stream.
+- No taglines: the owner had "league clips", "every day" and "League's best clips" taken out of every image and text
+  (2026-11-03). The brand is its name and logo.
 - Uploading stays with the owner: never post anything to YouTube, TikTok or Instagram.
 - No clip media in git: sources, renders and downloads go to `work/`, `sources/`, `renders/` or `build/`. The brand
   images and fonts are the only binaries tracked.
