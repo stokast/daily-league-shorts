@@ -3,6 +3,10 @@
 League's best clips, one every day, on YouTube Shorts, TikTok and Instagram Reels. One clip per short, the streamer
 credited on screen and in the text, uploaded by hand.
 
+The owner asked for other looks (2026-11-03: "give me other logo/rest of the design options, dont like those"):
+four are drawn by `brand/options.py` (A Sticker, B Broadcast, C Arcade, D Street), and this file changes to the
+one picked.
+
 Everything below is also on the brand kit page, with a Save button on each image, a Copy button on each text and the
 per-video captions filled in from a title and a streamer: https://claude.ai/artifact/7igQ9Dhoo4xNDAX1SSHS8D (its
 source is `brand/kit.html`).
