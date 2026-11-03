@@ -1,0 +1,8 @@
+requests
+numpy
+opencv-python-headless
+yt-dlp
+faster-whisper
+torch
+transformers
+pytest

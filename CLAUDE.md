@@ -11,7 +11,24 @@ channels' notes don't apply here.
 - `brand/kit.html`: the brand kit page, published at https://claude.ai/artifact/7igQ9Dhoo4xNDAX1SSHS8D. From another
   session, republish it with `url` set to that link, the PNGs of `brand/out/` as its `out/` files and the `downloads`
   capability.
-- The clip pipeline comes next (`README.md`).
+- `rift/`: the clip finder (`python -m rift top`, then `check`; `README.md`): Twitch's most viewed League clips of the
+  last 24 h, downloaded and checked (contact sheet, webcam, music, transcript, unpostable words). Tests in `tests/`
+  (`python -m pytest -q tests`).
+- `runs/<date>.md`: each day's picks and skips with the reason, so the next day's judgment starts from them.
+- The rest of the pipeline (layout, template render, captions, credit, review page) comes next (`README.md`).
+
+## Choosing clips
+Walk the ranking, most viewed first, one clip per moment, and take each clip unless:
+- the moment is in what's said and it isn't English. Trust Twitch's stream language: Whisper guesses short shouts
+  wrong. Pure gameplay can come from any stream;
+- nothing League happens and the talk isn't about League (an eviction story told in queue);
+- it's too short to follow (about 8 s or less): look for another viewer's longer clip of the same moment;
+- the check says `music` or `song`: look and listen first, and a song on stream is a skip;
+- it has a slur, abuse read out, or a title saying a slur was heard (the check's `unpostable` list is a start, not
+  the whole read);
+- it's another streamer's stream shown inside this one, a spectated game too small to read on a phone, or an
+  official esports broadcast (Riot claims those).
+A clip with no webcam is fine. Write the picks and the skips, each with its reason, in `runs/<date>.md`.
 
 ## Rules
 - Twitch credentials come from the environment only (`TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`). Never print, log or
