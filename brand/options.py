@@ -1,9 +1,10 @@
 """Four other looks for Rift Daily, drawn side by side so the owner can pick one (2026-11-03: "give me other
 logo/rest of the design options, dont like those").
 
-    python3 brand/options.py [1] [2]   # boards in work/brand_options/. Round 1: A Sticker, B Broadcast, C Arcade,
-                                       # D Street. Round 2: B2 Night Game, B3 Championship, B4 Daylight (like B),
-                                       # E Chrome, F Mono, G Esports
+    python3 brand/options.py [1] [2] [b3]   # boards in work/brand_options/. Round 1: A Sticker, B Broadcast,
+                                            # C Arcade, D Street. Round 2: B2 Night Game, B3 Championship, B4 Daylight
+                                            # (like B), E Chrome, F Mono, G Esports. b3: B3's three logos (crest,
+                                            # medal, club badge)
 
 Each look draws its avatar, wordmark, banner and the short's overlays (credit, tag, captions, hook) on the same
 frame of the Peyz short. Fonts (Google Fonts, OFL/Apache) download to build/fonts/ on first run.
@@ -706,26 +707,293 @@ class NightGame:
         return im
 
 
+# -- B3 refined (2026-11-03: "improve b3s logo, also the "clip" and "twitch.tv/mrbeat" arent verticaly aligned") --
+
+GOLD_METAL = [(0.0, (252, 226, 136)), (0.3, (232, 184, 52)), (0.48, (255, 232, 150)), (0.64, (226, 174, 44)),
+              (1.0, (160, 110, 16))]
+
+
+def line(parts, gap: int = 0):
+    """Text parts [(text, font, fill, spacing)] side by side on one baseline: (image, baseline y, cap height).
+    row() centres each part's box, so a smaller or lowercase part sits off the line; this doesn't."""
+    asc = max(f.getmetrics()[0] for _, f, _, _ in parts)
+    desc = max(f.getmetrics()[1] for _, f, _, _ in parts)
+    widths = [sum(f.getlength(c) for c in t) + f.size * sp * (len(t) - 1) if sp else f.getlength(t)
+              for t, f, _, sp in parts]
+    pad = 8
+    im = Image.new("RGBA", (int(sum(widths) + gap * (len(parts) - 1)) + 2 * pad, asc + desc + 2 * pad), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    base, x = pad + asc, pad
+    for (t, f, fill, sp), wd in zip(parts, widths):
+        if sp:
+            cx = x
+            for c in t:
+                d.text((cx, base), c, font=f, fill=fill, anchor="ls")
+                cx += f.getlength(c) + f.size * sp
+        else:
+            d.text((x, base), t, font=f, fill=fill, anchor="ls")
+        x += wd + gap
+    box = im.getbbox()
+    cap = max(-f.getbbox("H", anchor="ls")[1] for _, f, _, _ in parts)
+    return im.crop((box[0], 0, box[2], im.height)), base, cap
+
+
+def place_line(base_im: Image.Image, ln, x: float, cy: float, anchor: str = "l", shadow=None) -> None:
+    """Put a line() with its capitals centred on cy; `shadow` (radius, strength, dy) adds a soft shadow."""
+    im, b, cap = ln
+    pad = 0
+    if shadow:
+        pad = int(shadow[0] * 3) + abs(shadow[2])
+        im = soft_shadow(im, *shadow)
+    ax = {"l": pad, "c": im.width / 2, "r": im.width - pad}[anchor]
+    base_im.alpha_composite(im, (int(round(x - ax)), int(round(cy + cap / 2 - b - pad))))
+
+
+def metal(w: int, h: int, stops=GOLD_METAL, angle: float = 28) -> np.ndarray:
+    """Polished metal: colour stops along a diagonal (h x w x 3 floats)."""
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    a = math.radians(angle)
+    t = x * math.sin(a) + y * math.cos(a)
+    t = (t - t.min()) / max(1e-6, float(t.max() - t.min()))
+    return np.stack([np.interp(t, [s for s, _ in stops], [c[i] for _, c in stops]) for i in range(3)], -1)
+
+
+def inside(mask: Image.Image) -> np.ndarray:
+    """How far each pixel of a mask is from its edge, in pixels (0 outside; the canvas edge counts as an edge)."""
+    import cv2
+    m = cv2.copyMakeBorder((np.asarray(mask) > 127).astype(np.uint8), 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
+    return cv2.distanceTransform(m, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)[1:-1, 1:-1]
+
+
+def outside(mask: Image.Image) -> np.ndarray:
+    """How far each pixel is from the mask, in pixels (0 on it)."""
+    import cv2
+    return cv2.distanceTransform((np.asarray(mask) <= 127).astype(np.uint8), cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
+
+
+def band(dist: np.ndarray, a: float, b: float | None = None) -> np.ndarray:
+    """Alpha of the pixels between distances a and b (smooth edges)."""
+    out = np.clip(dist - a, 0, 1)
+    return out if b is None else out * np.clip(b - dist, 0, 1)
+
+
+def bevel(dist: np.ndarray, width: float, ridge: bool = True, light=(-0.55, -0.83)) -> np.ndarray:
+    """Light on a raised edge `width` px wide, from the top left: a rounded rim (ridge) or a chamfer. -1..1."""
+    gy, gx = np.gradient(dist)
+    facing = (gx * light[0] + gy * light[1]) / (np.hypot(gx, gy) + 1e-6)
+    t = np.clip(dist / width, 0, 1)
+    prof = np.cos(np.pi * t) if ridge else np.clip((1 - t) * 4, 0, 1)
+    return np.where(dist <= width, -prof * facing, 0.0)
+
+
+def lit(base: np.ndarray, shade: np.ndarray, k: float = 0.5, glint: float = 0.55) -> np.ndarray:
+    s = shade[..., None]
+    return np.clip(base * (1 + k * s) + 255 * np.clip(s - glint, 0, 1) * 1.4, 0, 255)
+
+
+def star_pts(cx: float, cy: float, r: float, inner: float = 0.42, rot: float = -90) -> list:
+    return [(cx + (r if i % 2 == 0 else r * inner) * math.cos(math.radians(rot + 36 * i)),
+             cy + (r if i % 2 == 0 else r * inner) * math.sin(math.radians(rot + 36 * i))) for i in range(10)]
+
+
+def leaf_pts(cx: float, cy: float, length: float, width: float, ang: float) -> list:
+    side = [((i / 16 - 0.5) * length, width / 2 * math.sin(math.pi * i / 16) ** 0.85) for i in range(17)]
+    pts = [(x, -y) for x, y in side] + [(x, y) for x, y in reversed(side)]
+    ca, sa = math.cos(ang), math.sin(ang)
+    return [(cx + x * ca - y * sa, cy + x * sa + y * ca) for x, y in pts]
+
+
+def bez(p0, p1, p2, p3, t):
+    """A point of a cubic Bezier curve."""
+    u = 1 - t
+    return (u ** 3 * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t ** 3 * p3[0],
+            u ** 3 * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t ** 3 * p3[1])
+
+
+def shield_pts(w: float, h: float, ox: float = 0, oy: float = 0) -> list:
+    """A heater shield in a w x h box: a gently arched top, straight sides, curves meeting in a point."""
+    n, arch, side = 48, 0.04, 0.42
+    pts = [(ox + w * i / n, oy + h * arch * (1 - math.sin(math.pi * i / n))) for i in range(n + 1)]
+    pts += [bez((ox + w, oy + h * side), (ox + w, oy + h * 0.74), (ox + w * 0.64, oy + h * 0.88), (ox + w / 2, oy + h),
+                i / n) for i in range(n + 1)]
+    pts += [bez((ox + w / 2, oy + h), (ox + w * 0.36, oy + h * 0.88), (ox, oy + h * 0.74), (ox, oy + h * side),
+                i / n) for i in range(n + 1)]
+    return pts
+
+
+def arc_text(m: Image.Image, t: str, f, cx: float, cy: float, r: float, top: bool = True, spacing: float = 0.0):
+    """Letters around a circle, their middles on radius r: over the top reading left to right, or along the
+    bottom (upright for the reader)."""
+    widths = [f.getlength(c) for c in t]
+    extra = f.size * spacing
+    span = (sum(widths) + extra * (len(t) - 1)) / r
+    cap = -f.getbbox("H", anchor="ls")[1]
+    acc, s = 0.0, int(f.size * 2.2)
+    for c, cw in zip(t, widths):
+        mid = (acc + cw / 2) / r
+        acc += cw + extra
+        if c == " ":
+            continue
+        th = -math.pi / 2 - span / 2 + mid if top else math.pi / 2 + span / 2 - mid
+        rot = -math.degrees(th + math.pi / 2) if top else math.degrees(math.pi / 2 - th)
+        tile = Image.new("L", (s, s), 0)
+        ImageDraw.Draw(tile).text((s / 2 - cw / 2, s / 2 + cap / 2), c, font=f, fill=255, anchor="ls")
+        tile = tile.rotate(rot, resample=Image.BICUBIC)
+        m.paste(255, (int(round(cx + r * math.cos(th) - s / 2)), int(round(cy + r * math.sin(th) - s / 2))), tile)
+
+
+class Painter:
+    """A small raster painter: layers drawn K times larger, composited, then scaled down (smooth edges)."""
+
+    def __init__(self, w: int, h: int, K: int = 4):
+        self.K, self.w, self.h = K, w * K, h * K
+        self.p = np.zeros((self.h, self.w, 3), np.float32)
+        self.a = np.zeros((self.h, self.w), np.float32)
+
+    def mask(self) -> Image.Image:
+        return Image.new("L", (self.w, self.h), 0)
+
+    def add(self, alpha, color) -> None:
+        if isinstance(alpha, Image.Image):
+            alpha = np.asarray(alpha, np.float32) / 255
+        al = np.clip(alpha, 0, 1)
+        self.p = np.asarray(color, np.float32) * al[..., None] + self.p * (1 - al[..., None])
+        self.a = al + self.a * (1 - al)
+
+    def image(self) -> Image.Image:
+        a = np.clip(self.a, 0, 1)[..., None]
+        rgb = np.where(a > 1e-4, self.p / np.maximum(a, 1e-4), 0)
+        im = Image.fromarray(np.dstack([np.clip(rgb, 0, 255), a * 255]).astype(np.uint8), "RGBA")
+        return im.resize((self.w // self.K, self.h // self.K), Image.LANCZOS)
+
+
 class Championship:
     key, name = "B3", "Championship"
-    pitch = "B made premium: a gold shield with a varsity RD, black and trophy gold, condensed type, gold rules."
+    pitch = "B made premium: a gold crest with a varsity RD, black and trophy gold, condensed type, gold rules."
     BLACK, GRAPHITE, GOLD, WHITE, GREY = (11, 11, 11), (34, 33, 30), (232, 184, 52), (246, 243, 235), (150, 146, 136)
     palette = [("Trophy Gold", GOLD), ("Black", BLACK), ("Ivory", WHITE), ("Graphite", GRAPHITE)]
     fonts = "Graduate · Saira Condensed"
+    LOGOS = {"crest": "Crest", "medal": "Medal", "club": "Club badge"}
 
-    def shield(self, h):
-        w, k = int(h * 0.84), 3
-        S = Image.new("RGBA", (w * k, h * k), (0, 0, 0, 0))
-        pts = lambda m: [(w * k * (0.04 + m), h * k * (0.07 + m)), (w * k * 0.5, h * k * (0.0 + m * 1.1)),  # noqa: E731
-                         (w * k * (0.96 - m), h * k * (0.07 + m)), (w * k * (0.96 - m), h * k * (0.56 - m * 0.2)),
-                         (w * k * 0.5, h * k * (1.0 - m * 1.4)), (w * k * (0.04 + m), h * k * (0.56 - m * 0.2))]
-        d = ImageDraw.Draw(S)
-        d.polygon(pts(0), fill=self.GOLD + (255,))
-        d.line(pts(0.06) + [pts(0.06)[0]], fill=self.BLACK + (255,), width=int(h * k * 0.022), joint="curve")
-        S = S.resize((w, h), Image.LANCZOS)
-        place(S, text("RD", gfont("Graduate", 400, h * 0.36), self.BLACK), w / 2, h * 0.44, "cm")
-        return S
+    def __init__(self, logo: str = "crest"):
+        self.logo = logo
 
+    # the logo ----------------------------------------------------------------------------------------------------
+    def mark(self, h: int, logo: str | None = None, small: bool = False) -> Image.Image:
+        """The logo `h` px tall; `small` drops the fine detail (the seam, under about 100 px)."""
+        return getattr(self, (logo or self.logo) + "_mark")(h, small)
+
+    def field(self, P: Painter) -> np.ndarray:
+        """The black inside of a badge, a little lighter at the top."""
+        ys = np.linspace(0, 1, P.h, dtype=np.float32)[:, None, None]
+        top, bottom = np.array((34, 32, 28), np.float32), np.array((9, 9, 9), np.float32)
+        return np.broadcast_to(top + (bottom - top) * ys ** 0.8, (P.h, P.w, 3))
+
+    def monogram(self, P: Painter, cx: float, cy: float, cap: float, fill=None, varsity: bool = True) -> None:
+        """RD in Graduate, capitals `cap` px tall (painter scale), centred on (cx, cy): polished gold with a
+        chamfer and a varsity outline (gold letters, a black gap, a thin gold line), or flat `fill`."""
+        f = gfont("Graduate", 400, cap * 100 / 75)
+        g = text("RD", f, (255, 255, 255), spacing=0.03).getchannel("A")
+        m = P.mask()
+        m.paste(g, (int(round(cx - g.width / 2)), int(round(cy - g.height / 2))))
+        if fill is not None:
+            P.add(m, fill)
+            return
+        gold = metal(P.w, P.h)
+        if varsity:
+            out = outside(m)
+            P.add(band(out, -1, cap * 0.075), self.BLACK)
+            P.add(band(out, cap * 0.045, cap * 0.075), lit(gold, np.zeros(out.shape, np.float32)))
+        d = inside(m)
+        P.add(band(d, 0), lit(gold, bevel(d, cap * 0.05, ridge=False), k=0.45))
+
+    def crest_mark(self, h: int, small: bool = False) -> Image.Image:
+        w = int(h * 0.84)
+        P = Painter(w, h)
+        m = P.mask()
+        ImageDraw.Draw(m).polygon(shield_pts(P.w, P.h), fill=255)
+        d = inside(m)
+        H = P.h
+        b = H * (0.085 if small else 0.062)
+        gold = metal(P.w, P.h)
+        P.add(band(d, 0), lit(gold, bevel(d, b)))
+        P.add(band(d, b), self.field(P))
+        if small:
+            self.monogram(P, P.w / 2, H * 0.43, H * 0.3, varsity=False)
+            return P.image()
+        P.add(band(d, b + H * 0.024, b + H * 0.032), gold)
+        sm = P.mask()
+        sd = ImageDraw.Draw(sm)
+        for x, y, r in ((0.5, 0.215, 0.042), (0.335, 0.235, 0.03), (0.665, 0.235, 0.03)):
+            sd.polygon(star_pts(P.w * x, H * y, H * r), fill=255)
+        P.add(sm, gold)
+        self.monogram(P, P.w / 2, H * 0.5, H * 0.25)
+        return P.image()
+
+    def medal_mark(self, h: int, small: bool = False) -> Image.Image:
+        P = Painter(h, h)
+        H = P.h
+        c = H / 2
+        y, x = np.mgrid[0:H, 0:H].astype(np.float32)
+        d = c - np.hypot(x - c, y - c)
+        gold = metal(H, H)
+        b = H * (0.085 if small else 0.062)
+        P.add(band(d, 0), lit(gold, bevel(d, b)))
+        P.add(band(d, b), self.field(P))
+        if small:
+            self.monogram(P, c, c, H * 0.3, varsity=False)
+            return P.image()
+        P.add(band(d, b + H * 0.016, b + H * 0.023), gold)
+        m = P.mask()
+        md = ImageDraw.Draw(m)
+        rs, phi0, phi1 = H * 0.335, 0.2, 2.5
+        md.arc([c - rs, c - rs, c + rs, c + rs], 90 + math.degrees(phi0), 90 + math.degrees(phi1),
+               fill=255, width=int(H * 0.011))
+        n = 9
+        for i in range(n):
+            phi = phi0 + 0.06 + (phi1 - phi0 - 0.1) * i / (n - 1)
+            nx, ny = c - rs * math.sin(phi), c + rs * math.cos(phi)
+            psi = math.atan2(-math.sin(phi), -math.cos(phi))
+            k = 1 - 0.32 * i / (n - 1)
+            L, Wd = H * 0.092 * k, H * 0.036 * k
+            for a in (psi - 0.62, psi + 0.62):
+                md.polygon(leaf_pts(nx + math.cos(a) * L * 0.48, ny + math.sin(a) * L * 0.48, L, Wd, a), fill=255)
+        md.polygon(leaf_pts(c - rs * math.sin(phi1 + 0.08), c + rs * math.cos(phi1 + 0.08), H * 0.07, H * 0.03,
+                            math.atan2(-math.sin(phi1), -math.cos(phi1))), fill=255)
+        m = ImageChops.lighter(m, m.transpose(Image.FLIP_LEFT_RIGHT))
+        ImageDraw.Draw(m).polygon(star_pts(c, c - rs, H * 0.048), fill=255)
+        ld = inside(m)
+        P.add(band(ld, 0), lit(gold, bevel(ld, H * 0.006, ridge=False), k=0.4))
+        self.monogram(P, c, c + H * 0.01, H * 0.2)
+        return P.image()
+
+    def club_mark(self, h: int, small: bool = False) -> Image.Image:
+        P = Painter(h, h)
+        H = P.h
+        c = H / 2
+        y, x = np.mgrid[0:H, 0:H].astype(np.float32)
+        d = c - np.hypot(x - c, y - c)
+        gold = metal(H, H)
+        o, b1, b2 = (H * 0.07, H * 0.17, H * 0.21) if small else (H * 0.034, H * 0.152, H * 0.176)
+        P.add(band(d, 0), lit(gold, bevel(d, o)))
+        P.add(band(d, o), self.field(P))
+        P.add(band(d, b1), lit(gold, bevel(d - b1, b2 - b1)))
+        disc = metal(H, H, angle=-30)
+        P.add(band(d, b2), lit(disc, np.zeros(d.shape, np.float32)))
+        if not small:
+            m = P.mask()
+            f = gfont("Saira Condensed", 800, H * 0.078)
+            r = c - (o + b1) / 2
+            arc_text(m, "RIFT DAILY", f, c, c, r, top=True, spacing=0.17)
+            arc_text(m, "LEAGUE CLIPS", f, c, c, r, top=False, spacing=0.17)
+            sd = ImageDraw.Draw(m)
+            for sx in (c - r, c + r):
+                sd.polygon(star_pts(sx, c, H * 0.03), fill=255)
+            P.add(m, gold)
+        self.monogram(P, c, c, H * (0.24 if small else 0.2), fill=self.BLACK)
+        return P.image()
+
+    # the rest of the look ---------------------------------------------------------------------------------------
     def wordmark(self, h=210):
         wm = text("RIFT DAILY", gfont("Saira Condensed", 900, h), self.WHITE, spacing=0.03)
         im = Image.new("RGBA", (wm.width, wm.height + int(h * 0.36)), (0, 0, 0, 0))
@@ -743,36 +1011,48 @@ class Championship:
         arr = base + (hi - base) * k[..., None]
         return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
 
-    def avatar(self, s=800):
+    def avatar(self, s=800, logo=None):
+        logo = logo or self.logo
         im = self.glow_bg(s, s, s / 2, s / 2, s * 0.6)
-        place(im, self.shield(int(s * 0.66)), s / 2, s / 2, "cm")
+        place(im, soft_shadow(self.mark(int(s * (0.7 if logo == "crest" else 0.84)), logo), 14, 0.7, 6), s / 2,
+              s / 2, "cm")
         return im.convert("RGB")
 
-    def banner(self):
+    def lockup(self, h: int = 300, logo=None) -> Image.Image:
+        """The logo and the name side by side."""
+        mk = self.mark(h, logo)
+        wm = fit(self.wordmark(220), h=int(h * 0.62))
+        return row([mk, wm], gap=int(h * 0.2))
+
+    def banner(self, logo=None):
         bw, bh = 2560, 1440
         im = self.glow_bg(bw, bh, bw / 2, bh / 2, 1100)
-        sh = self.shield(330)
-        place(im, sh, 600, 720, "lm")
-        wm = fit(self.wordmark(220), w=1080)
-        place(im, wm, 600 + sh.width + 70, 690, "lm")
+        mk = self.mark(340, logo)
+        wm = fit(self.wordmark(220), w=1020)
+        x0 = (bw - (mk.width + 80 + wm.width)) / 2
+        place(im, soft_shadow(mk, 10, 0.7, 5), x0 - 35, 720, "lm")
+        x = x0 + mk.width + 80
+        place(im, wm, x, 690, "lm")
         tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Saira Condensed", 600, 50), self.GOLD, spacing=0.16)
-        place(im, tag, 600 + sh.width + 70, 690 + wm.height / 2 + 30, "lt")
+        place(im, tag, x, 690 + wm.height / 2 + 30, "lt")
         return im.convert("RGB")
 
-    def overlay(self, frame):
+    def overlay(self, frame, logo=None):
         im = frame.copy()
         d = ImageDraw.Draw(im, "RGBA")
         d.rectangle([0, CAM_H - 38, W, CAM_H + 38], fill=self.BLACK + (238,))
         d.rectangle([0, CAM_H - 38, W, CAM_H - 36], fill=self.GOLD + (255,))
         d.rectangle([0, CAM_H + 36, W, CAM_H + 38], fill=self.GOLD + (255,))
-        place(im, self.shield(56), 26, CAM_H, "lm")
-        place(im, text("RIFT DAILY", gfont("Saira Condensed", 800, 40), self.WHITE, spacing=0.05), 84, CAM_H, "lm")
-        cr = row([text("CLIP", gfont("Saira Condensed", 600, 30), self.GOLD, spacing=0.14),
-                  text(CREDIT, gfont("Saira Condensed", 700, 38), self.WHITE, spacing=0.02)], gap=16)
-        place(im, cr, W - 26, CAM_H, "rm")
+        mk = self.mark(62, logo, small=True)
+        place(im, mk, 22, CAM_H, "lm")
+        name = gfont("Saira Condensed", 800, 40)
+        place_line(im, line([("RIFT DAILY", name, self.WHITE, 0.05)]), 22 + mk.width + 14, CAM_H)
+        credit = gfont("Saira Condensed", 700, 40)
+        place_line(im, line([("CLIP", credit, self.GOLD, 0.12), (CREDIT, credit, self.WHITE, 0.02)], gap=16),
+                   W - 26, CAM_H, "r")
         f = gfont("Saira Condensed", 900, 96)
-        words = [text(w, f, self.GOLD if i == ACTIVE else self.WHITE) for i, w in enumerate(CAPTION)]
-        place(im, soft_shadow(row(words, gap=20), 9, 0.8, 3), W / 2, CAM_H - 112, "cm")
+        words = line([(w, f, self.GOLD if i == ACTIVE else self.WHITE, 0) for i, w in enumerate(CAPTION)], gap=22)
+        place_line(im, words, W / 2, CAM_H - 112, "c", shadow=(9, 0.8, 3))
         f2 = gfont("Saira Condensed", 900, 110)
         l1, l2 = text(HOOK[0], f2, self.WHITE), text(HOOK[1], f2, self.GOLD)
         hk = stack([l1, l2], gap=8)
@@ -1145,9 +1425,42 @@ def overview(frame: Image.Image, options=None) -> Image.Image:
     return im.convert("RGB")
 
 
+def logo_board(frame: Image.Image) -> Image.Image:
+    """B3's three logos side by side: the avatar as the apps crop it, small sizes, the name, the seam, the banner."""
+    o = Championship()
+    bw, bh, col = 3000, 2130, 1000
+    im = Image.new("RGBA", (bw, bh), (22, 22, 24, 255))
+    place(im, text("B3 CHAMPIONSHIP  ·  THREE LOGOS", font("barlow_black", 84), (245, 245, 245)), 60, 50, "lt")
+    place(im, text("The colours, type and short overlays stay B3's. On the seam, CLIP and the handle now sit on one "
+                   "baseline.", font("barlow_bold", 34), (180, 182, 190)), 60, 160, "lt")
+    for i, (key, label) in enumerate(o.LOGOS.items()):
+        cx = col * i + col / 2
+        place(im, text(f"{i + 1}  {label.upper()}", font("barlow_black", 64), (245, 245, 245)), cx, 250, "ct")
+        av = o.avatar(800, key)
+        av.save(OUT / f"B3-logo-{key}-avatar.png")
+        place(im, circle(av.resize((560, 560), Image.LANCZOS)), cx, 340, "ct")
+        x = cx - (140 + 88 + 56 + 2 * 40) / 2
+        for s in (140, 88, 56):
+            place(im, circle(av.resize((s, s), Image.LANCZOS)), x, 1000, "lm")
+            x += s + 40
+        card = Image.new("RGBA", (920, 250), (11, 11, 11, 255))
+        place(card, fit(o.lockup(300, key), w=840, h=200), 460, 125, "cm")
+        place(im, card, cx, 1120, "ct")
+        shot = o.overlay(frame, key)
+        shot.convert("RGB").save(OUT / f"B3-logo-{key}-short.png")
+        place(im, shot.crop((0, CAM_H - 70, W, CAM_H + 70)).resize((920, 119), Image.LANCZOS), cx, 1410, "ct")
+        bn = o.banner(key)
+        bn.save(OUT / f"B3-logo-{key}-banner.png")
+        place(im, fit(bn.convert("RGBA"), w=920), cx, 1570, "ct")
+    return im.convert("RGB")
+
+
 def main(rounds=("1", "2")):
     OUT.mkdir(parents=True, exist_ok=True)
     frame = base_frame()
+    if "b3" in rounds:
+        logo_board(frame).save(OUT / "board-B3-logos.jpg", quality=90)
+        print("board B3 logos")
     if "1" in rounds:
         for o in OPTIONS:
             board(o, frame).save(OUT / f"board-{o.key}-{o.name.lower()}.jpg", quality=90)
