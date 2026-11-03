@@ -4,7 +4,9 @@ League's best clips, one every day, on YouTube Shorts, TikTok and Instagram Reel
 credited on screen and in the text, uploaded by hand.
 
 The owner asked for other looks (2026-11-03: "give me other logo/rest of the design options, dont like those"):
-four are drawn by `brand/options.py` (A Sticker, B Broadcast, C Arcade, D Street), and this file changes to the
+four are drawn by `brand/options.py` (A Sticker, B Broadcast, C Arcade, D Street). The owner liked B most and
+asked for more ("i like B the most, but want more options, maybe 2-3 like B + 2-3 more"): round 2 adds B2 Night
+Game, B3 Championship and B4 Daylight in B's spirit, and E Chrome, F Mono and G Esports. This file changes to the
 one picked.
 
 Everything below is also on the brand kit page, with a Save button on each image, a Copy button on each text and the

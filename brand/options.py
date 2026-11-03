@@ -1,7 +1,9 @@
 """Four other looks for Rift Daily, drawn side by side so the owner can pick one (2026-11-03: "give me other
 logo/rest of the design options, dont like those").
 
-    python3 brand/options.py     # boards in work/brand_options/: A-sticker, B-broadcast, C-arcade, D-street
+    python3 brand/options.py [1] [2]   # boards in work/brand_options/. Round 1: A Sticker, B Broadcast, C Arcade,
+                                       # D Street. Round 2: B2 Night Game, B3 Championship, B4 Daylight (like B),
+                                       # E Chrome, F Mono, G Esports
 
 Each look draws its avatar, wordmark, banner and the short's overlays (credit, tag, captions, hook) on the same
 frame of the Peyz short. Fonts (Google Fonts, OFL/Apache) download to build/fonts/ on first run.
@@ -599,7 +601,483 @@ class Street:
         return im
 
 
+# -- round 2 (2026-11-03: "i like B the most, but want more options, maybe 2-3 like B + 2-3 more") -----------------
+
+GFONTS = ROOT / "build/fonts/google"
+
+
+def gfont(family: str, weight: int, size: float, italic: bool = False) -> ImageFont.FreeTypeFont:
+    """Any Google font at one weight, fetched once through the Google Fonts CSS API."""
+    path = GFONTS / f"{family.replace(' ', '')}-{weight}{'i' if italic else ''}.ttf"
+    if not path.exists():
+        import re
+        GFONTS.mkdir(parents=True, exist_ok=True)
+        spec = f"{family.replace(' ', '+')}:ital,wght@{1 if italic else 0},{weight}"
+        req = urllib.request.Request(f"https://fonts.googleapis.com/css2?family={spec}", headers={"User-Agent": "Mozilla/4.0"})
+        css = urllib.request.urlopen(req, timeout=30).read().decode()
+        urllib.request.urlretrieve(re.search(r"url\((https://[^)]+\.ttf)\)", css).group(1), path)
+    return ImageFont.truetype(str(path), max(6, int(round(size))))
+
+
+def shear(im: Image.Image, k: float) -> Image.Image:
+    """Lean a shape forward by k (0.2 = 0.2 px across per px down), like italics."""
+    pad = int(abs(k) * im.height) + 2
+    return im.transform((im.width + pad, im.height), Image.AFFINE, (1, k, -pad if k > 0 else 0, 0, 1, 0),
+                        resample=Image.BICUBIC)
+
+
+def slanted(w: int, h: int, color, slant: float = 0.22, k: int = 3) -> Image.Image:
+    im = Image.new("RGBA", (w * k, h * k), (0, 0, 0, 0))
+    s = h * k * slant
+    ImageDraw.Draw(im).polygon([(s, 0), (w * k, 0), (w * k - s, h * k), (0, h * k)], fill=color)
+    return im.resize((w, h), Image.LANCZOS)
+
+
+def lines_bg(w: int, h: int, color, line, step: int, width: int) -> Image.Image:
+    im = Image.new("RGBA", (w, h), color + (255,))
+    d = ImageDraw.Draw(im)
+    for x in range(-h, w + h, step):
+        d.line([(x, 0), (x + h, h)], fill=line, width=width)
+    return im
+
+
+class NightGame:
+    key, name = "B2", "Night Game"
+    pitch = "B with speed: an electric-blue slanted RD badge on true black, very condensed type, slanted tabs."
+    BLACK, PANEL, BLUE, ICE, STEEL = (8, 8, 10), (22, 24, 30), (37, 99, 255), (238, 243, 255), (126, 134, 152)
+    palette = [("Electric", BLUE), ("Black", BLACK), ("Ice", ICE), ("Steel", STEEL)]
+    fonts = "Big Shoulders Display · Barlow"
+
+    def badge(self, h):
+        w = int(h * 1.32)
+        im = slanted(w, h, self.BLUE + (255,), 0.24)
+        place(im, text("RD", gfont("Big Shoulders Display", 900, h * 0.92), self.ICE), w / 2 + h * 0.02, h * 0.53, "cm")
+        return im
+
+    def wordmark(self, h=220):
+        f = gfont("Big Shoulders Display", 900, h)
+        return shear(row([text("RIFT", f, self.ICE, spacing=0.02), text("DAILY", f, self.BLUE, spacing=0.02)],
+                         gap=int(h * 0.16)), -0.12)
+
+    def avatar(self, s=800):
+        im = lines_bg(s, s, self.BLACK, self.PANEL + (255,), 30, 8)
+        place(im, self.badge(int(s * 0.44)), s / 2, s / 2, "cm")
+        return im.convert("RGB")
+
+    def banner(self):
+        bw, bh = 2560, 1440
+        im = lines_bg(bw, bh, self.BLACK, self.PANEL + (255,), 40, 10)
+        b = self.badge(250)
+        place(im, b, 560, 720, "lm")
+        wm = fit(self.wordmark(230), w=1060)
+        place(im, wm, 560 + b.width + 50, 700, "lb")
+        tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Barlow Semi Condensed", 600, 50), self.STEEL, spacing=0.12)
+        place(im, tag, 560 + b.width + 70, 735, "lt")
+        return im.convert("RGB")
+
+    def overlay(self, frame):
+        im = frame.copy()
+        d = ImageDraw.Draw(im, "RGBA")
+        d.rectangle([0, CAM_H - 36, W, CAM_H + 36], fill=self.BLACK + (236,))
+        left = slanted(330, 72, self.BLUE + (255,), 0.32)
+        place(left, self.badge(46), 40, 36, "lm")
+        place(left, text("RIFT DAILY", gfont("Big Shoulders Display", 900, 40), self.ICE, spacing=0.03), 120, 36, "lm")
+        place(im, left, -20, CAM_H, "lm")
+        tab = slanted(116, 72, self.BLUE + (255,), 0.32)
+        place(tab, text("CLIP", gfont("Barlow Semi Condensed", 700, 30), self.ICE, spacing=0.08), 58, 36, "cm")
+        handle = text(CREDIT, gfont("Barlow", 700, 34), self.ICE)
+        place(im, handle, W - 26, CAM_H, "rm")
+        place(im, tab, W - 26 - handle.width - 14, CAM_H, "rm")
+        f = gfont("Barlow", 900, 82)
+        parts = []
+        for i, w in enumerate(CAPTION):
+            t = text(w, f, self.ICE)
+            if i == ACTIVE:
+                box = slanted(t.width + 50, t.height + 26, self.BLUE + (255,), 0.2)
+                place(box, t, box.width / 2, box.height / 2, "cm")
+                t = box
+            parts.append(t)
+        place(im, soft_shadow(row(parts, gap=14), 8, 0.7, 3), W / 2, CAM_H - 112, "cm")
+        f2 = gfont("Big Shoulders Display", 900, 112)
+        hk = stack([text(HOOK[0], f2, self.ICE), text(HOOK[1], f2, self.BLUE)], gap=4, align="l")
+        panel = slanted(hk.width + 120, hk.height + 50, self.BLACK + (205,), 0.12)
+        place(panel, hk, 60, 25, "lt")
+        place(im, fit(panel, w=1020), 20, CAM_H + 80, "lt")
+        return im
+
+
+class Championship:
+    key, name = "B3", "Championship"
+    pitch = "B made premium: a gold shield with a varsity RD, black and trophy gold, condensed type, gold rules."
+    BLACK, GRAPHITE, GOLD, WHITE, GREY = (11, 11, 11), (34, 33, 30), (232, 184, 52), (246, 243, 235), (150, 146, 136)
+    palette = [("Trophy Gold", GOLD), ("Black", BLACK), ("Ivory", WHITE), ("Graphite", GRAPHITE)]
+    fonts = "Graduate · Saira Condensed"
+
+    def shield(self, h):
+        w, k = int(h * 0.84), 3
+        S = Image.new("RGBA", (w * k, h * k), (0, 0, 0, 0))
+        pts = lambda m: [(w * k * (0.04 + m), h * k * (0.07 + m)), (w * k * 0.5, h * k * (0.0 + m * 1.1)),  # noqa: E731
+                         (w * k * (0.96 - m), h * k * (0.07 + m)), (w * k * (0.96 - m), h * k * (0.56 - m * 0.2)),
+                         (w * k * 0.5, h * k * (1.0 - m * 1.4)), (w * k * (0.04 + m), h * k * (0.56 - m * 0.2))]
+        d = ImageDraw.Draw(S)
+        d.polygon(pts(0), fill=self.GOLD + (255,))
+        d.line(pts(0.06) + [pts(0.06)[0]], fill=self.BLACK + (255,), width=int(h * k * 0.022), joint="curve")
+        S = S.resize((w, h), Image.LANCZOS)
+        place(S, text("RD", gfont("Graduate", 400, h * 0.36), self.BLACK), w / 2, h * 0.44, "cm")
+        return S
+
+    def wordmark(self, h=210):
+        wm = text("RIFT DAILY", gfont("Saira Condensed", 900, h), self.WHITE, spacing=0.03)
+        im = Image.new("RGBA", (wm.width, wm.height + int(h * 0.36)), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        im.alpha_composite(wm, (0, int(h * 0.18)))
+        lw = max(3, int(h * 0.025))
+        d.rectangle([0, 0, wm.width, lw], fill=self.GOLD + (255,))
+        d.rectangle([0, im.height - lw - 1, wm.width, im.height - 1], fill=self.GOLD + (255,))
+        return im
+
+    def glow_bg(self, w, h, cx, cy, r):
+        y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+        k = np.clip(1 - np.hypot(x - cx, y - cy) / r, 0, 1) ** 1.6
+        base, hi = np.array(self.BLACK, np.float32), np.array(self.GRAPHITE, np.float32) * 1.4
+        arr = base + (hi - base) * k[..., None]
+        return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
+
+    def avatar(self, s=800):
+        im = self.glow_bg(s, s, s / 2, s / 2, s * 0.6)
+        place(im, self.shield(int(s * 0.66)), s / 2, s / 2, "cm")
+        return im.convert("RGB")
+
+    def banner(self):
+        bw, bh = 2560, 1440
+        im = self.glow_bg(bw, bh, bw / 2, bh / 2, 1100)
+        sh = self.shield(330)
+        place(im, sh, 600, 720, "lm")
+        wm = fit(self.wordmark(220), w=1080)
+        place(im, wm, 600 + sh.width + 70, 690, "lm")
+        tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Saira Condensed", 600, 50), self.GOLD, spacing=0.16)
+        place(im, tag, 600 + sh.width + 70, 690 + wm.height / 2 + 30, "lt")
+        return im.convert("RGB")
+
+    def overlay(self, frame):
+        im = frame.copy()
+        d = ImageDraw.Draw(im, "RGBA")
+        d.rectangle([0, CAM_H - 38, W, CAM_H + 38], fill=self.BLACK + (238,))
+        d.rectangle([0, CAM_H - 38, W, CAM_H - 36], fill=self.GOLD + (255,))
+        d.rectangle([0, CAM_H + 36, W, CAM_H + 38], fill=self.GOLD + (255,))
+        place(im, self.shield(56), 26, CAM_H, "lm")
+        place(im, text("RIFT DAILY", gfont("Saira Condensed", 800, 40), self.WHITE, spacing=0.05), 84, CAM_H, "lm")
+        cr = row([text("CLIP", gfont("Saira Condensed", 600, 30), self.GOLD, spacing=0.14),
+                  text(CREDIT, gfont("Saira Condensed", 700, 38), self.WHITE, spacing=0.02)], gap=16)
+        place(im, cr, W - 26, CAM_H, "rm")
+        f = gfont("Saira Condensed", 900, 96)
+        words = [text(w, f, self.GOLD if i == ACTIVE else self.WHITE) for i, w in enumerate(CAPTION)]
+        place(im, soft_shadow(row(words, gap=20), 9, 0.8, 3), W / 2, CAM_H - 112, "cm")
+        f2 = gfont("Saira Condensed", 900, 110)
+        l1, l2 = text(HOOK[0], f2, self.WHITE), text(HOOK[1], f2, self.GOLD)
+        hk = stack([l1, l2], gap=8)
+        panel = Image.new("RGBA", (hk.width + 80, hk.height + 60), (0, 0, 0, 0))
+        pd = ImageDraw.Draw(panel)
+        pd.rectangle([0, 0, panel.width, panel.height], fill=self.BLACK + (190,))
+        pd.rectangle([0, 0, panel.width, 3], fill=self.GOLD + (255,))
+        pd.rectangle([0, panel.height - 4, panel.width, panel.height], fill=self.GOLD + (255,))
+        place(panel, hk, panel.width / 2, panel.height / 2, "cm")
+        place(im, fit(panel, w=1000), W / 2, CAM_H + 82, "ct")
+        return im
+
+
+class Daylight:
+    key, name = "B4", "Daylight"
+    pitch = "B in daylight: a red roundel on chalk white, black condensed type, a white lower third, boxed captions."
+    CHALK, RED, BLACK, GREY = (246, 244, 239), (226, 35, 26), (16, 16, 16), (122, 120, 116)
+    palette = [("Race Red", RED), ("Chalk", CHALK), ("Black", BLACK), ("Grey", GREY)]
+    fonts = "Oswald · Barlow"
+    wordmark_on = CHALK
+
+    def roundel(self, s):
+        k = 4
+        im = Image.new("RGBA", (s * k, s * k), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.ellipse([0, 0, s * k - 1, s * k - 1], fill=self.RED + (255,))
+        m = s * k * 0.07
+        d.ellipse([m, m, s * k - 1 - m, s * k - 1 - m], outline=self.CHALK + (255,), width=int(s * k * 0.022))
+        im = im.resize((s, s), Image.LANCZOS)
+        place(im, text("RD", gfont("Oswald", 700, s * 0.46), self.CHALK), s / 2, s * 0.5, "cm")
+        return im
+
+    def wordmark(self, h=210):
+        f = gfont("Oswald", 700, h)
+        return row([text("RIFT", f, self.BLACK, spacing=0.01), text("DAILY", f, self.RED, spacing=0.01)],
+                   gap=int(h * 0.2))
+
+    def paper_grid(self, w, h, step):
+        im = Image.new("RGBA", (w, h), self.CHALK + (255,))
+        d = ImageDraw.Draw(im)
+        for x in range(0, w, step):
+            d.line([(x, 0), (x, h)], fill=(232, 229, 222, 255), width=2)
+        for y in range(0, h, step):
+            d.line([(0, y), (w, y)], fill=(232, 229, 222, 255), width=2)
+        return im
+
+    def avatar(self, s=800):
+        im = self.paper_grid(s, s, 40)
+        place(im, self.roundel(int(s * 0.66)), s / 2, s / 2, "cm")
+        return im.convert("RGB")
+
+    def banner(self):
+        bw, bh = 2560, 1440
+        im = self.paper_grid(bw, bh, 64)
+        r = self.roundel(300)
+        place(im, r, 580, 720, "lm")
+        wm = fit(self.wordmark(220), w=1050)
+        place(im, wm, 580 + 300 + 60, 700, "lb")
+        tag = text("LEAGUE'S BEST CLIPS — EVERY DAY", gfont("Barlow Semi Condensed", 600, 50), self.GREY, spacing=0.12)
+        place(im, tag, 580 + 300 + 64, 735, "lt")
+        return im.convert("RGB")
+
+    def boxed(self, t, f, fg, bg, padx=18, pady=10):
+        tx = text(t, f, fg)
+        box = Image.new("RGBA", (tx.width + 2 * padx, tx.height + 2 * pady), bg + (255,))
+        place(box, tx, box.width / 2, box.height / 2, "cm")
+        return box
+
+    def overlay(self, frame):
+        im = frame.copy()
+        d = ImageDraw.Draw(im, "RGBA")
+        d.rectangle([0, CAM_H - 36, W, CAM_H + 36], fill=self.CHALK + (246,))
+        d.rectangle([0, CAM_H - 36, W, CAM_H - 32], fill=self.RED + (255,))
+        place(im, self.roundel(54), 24, CAM_H + 2, "lm")
+        place(im, text("RIFT DAILY", gfont("Oswald", 700, 36), self.BLACK, spacing=0.03), 92, CAM_H + 2, "lm")
+        cr = row([text("CLIP", gfont("Barlow Semi Condensed", 700, 30), self.RED, spacing=0.1),
+                  text(CREDIT, gfont("Barlow", 700, 34), self.BLACK)], gap=14)
+        place(im, cr, W - 26, CAM_H + 2, "rm")
+        f = gfont("Barlow", 900, 76)
+        words = [self.boxed(w, f, self.CHALK if i == ACTIVE else self.BLACK, self.RED if i == ACTIVE else self.CHALK)
+                 for i, w in enumerate(CAPTION)]
+        place(im, soft_shadow(row(words, gap=10), 6, 0.5, 3), W / 2, CAM_H - 112, "cm")
+        f2 = gfont("Oswald", 700, 92)
+        hk = stack([self.boxed(HOOK[0], f2, self.BLACK, self.CHALK, 26, 8), self.boxed(HOOK[1], f2, self.RED, self.CHALK, 26, 8)],
+                   gap=10, align="l")
+        place(im, soft_shadow(fit(hk, w=1000), 8, 0.5, 4), 26, CAM_H + 70, "lt")
+        return im
+
+
+class Chrome:
+    key, name = "E", "Chrome"
+    pitch = "Y2K and flashy: liquid-chrome lettering with sparkles on black, wide rounded type, ice-blue light."
+    BLACK, ICE, SILVER, NIGHT, WHITE = (6, 6, 8), (150, 215, 255), (200, 205, 215), (18, 20, 28), (248, 250, 255)
+    palette = [("Chrome", SILVER), ("Ice", ICE), ("Black", BLACK), ("White", WHITE)]
+    fonts = "Unbounded"
+    BANDS = [(0, (255, 255, 255)), (0.36, (196, 204, 220)), (0.5, (62, 66, 80)), (0.56, (120, 126, 140)),
+             (0.68, (226, 234, 246)), (0.86, (150, 160, 178)), (1, (236, 242, 252))]
+
+    def chrome(self, t, size, weight=800):
+        g = text(t, gfont("Unbounded", weight, size), (255, 255, 255))
+        im = fill_gradient(g, self.BANDS)
+        out = grow(im, size * 0.045, (24, 26, 34))
+        return glow(out, self.ICE, size * 0.08, 0.35)
+
+    def sparkle(self, s, color=None):
+        color = color or self.WHITE
+        im = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        c, a, b = s / 2, s / 2, s * 0.09
+        d.polygon([(c, c - a), (c + b, c - b), (c + a, c), (c + b, c + b), (c, c + a), (c - b, c + b), (c - a, c),
+                   (c - b, c - b)], fill=color + (255,))
+        return glow(im, self.ICE, s * 0.12, 0.8)
+
+    def wordmark(self, h=200):
+        return self.chrome("RIFT DAILY", h)
+
+    def spotlight(self, w, h, cx, cy, r):
+        y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+        k = np.clip(1 - np.hypot((x - cx) / 1.4, y - cy) / r, 0, 1) ** 2
+        arr = np.array(self.BLACK, np.float32) + (np.array((30, 44, 70), np.float32) - self.BLACK) * k[..., None]
+        return Image.fromarray(arr.astype(np.uint8), "RGB").convert("RGBA")
+
+    def avatar(self, s=800):
+        im = self.spotlight(s, s, s / 2, s / 2, s * 0.55)
+        rd = fit(self.chrome("RD", 300, 900), w=int(s * 0.62))
+        place(im, rd, s / 2, s / 2, "cm")
+        place(im, self.sparkle(int(s * 0.16)), s * 0.76, s * 0.27, "cm")
+        place(im, self.sparkle(int(s * 0.09)), s * 0.25, s * 0.72, "cm")
+        return im.convert("RGB")
+
+    def banner(self):
+        bw, bh = 2560, 1440
+        im = self.spotlight(bw, bh, bw / 2, bh / 2, 900)
+        wm = fit(self.wordmark(200), w=1300)
+        place(im, wm, bw / 2, 690, "cm")
+        place(im, self.sparkle(130), bw / 2 + wm.width / 2 - 30, 690 - wm.height / 2 + 10, "cm")
+        place(im, self.sparkle(70), bw / 2 - wm.width / 2 + 40, 690 + wm.height / 2 - 20, "cm")
+        tag = text("LEAGUE'S BEST CLIPS · EVERY DAY", gfont("Unbounded", 500, 38), self.SILVER, spacing=0.14)
+        place(im, tag, bw / 2, 690 + wm.height / 2 + 50, "ct")
+        return im.convert("RGB")
+
+    def overlay(self, frame):
+        im = frame.copy()
+        line = fill_gradient(Image.new("RGBA", (W, 5), (255, 255, 255, 255)), [(0, self.SILVER), (1, self.SILVER)])
+        hl = np.linspace(0, 1, W)
+        arr = np.asarray(line).copy()
+        arr[..., :3] = (np.array(self.SILVER)[None, None, :] * (0.55 + 0.45 * np.sin(hl * 9)[None, :, None] ** 2)).astype(np.uint8)
+        place(im, Image.fromarray(arr, "RGBA"), 0, CAM_H, "lm")
+
+        def pill(content):
+            p = Image.new("RGBA", (content.width + 48, max(66, content.height + 28)), (0, 0, 0, 0))
+            ImageDraw.Draw(p).rounded_rectangle([0, 0, p.width - 1, p.height - 1], radius=p.height // 2,
+                                                fill=self.NIGHT + (235,), outline=self.SILVER + (255,), width=3)
+            place(p, content, p.width / 2, p.height / 2, "cm")
+            return p
+
+        tag = row([fit(self.chrome("RD", 60, 900), h=40), text("RIFT DAILY", gfont("Unbounded", 700, 24), self.WHITE)],
+                  gap=12)
+        place(im, pill(tag), 22, CAM_H, "lm")
+        lab = row([text("CLIP", gfont("Unbounded", 600, 24), self.ICE, spacing=0.1),
+                   text(CREDIT, gfont("Unbounded", 600, 26), self.WHITE)], gap=14)
+        place(im, pill(lab), W - 22, CAM_H, "rm")
+        f = gfont("Unbounded", 800, 66)
+        words = [glow(text(w, f, self.ICE if i == ACTIVE else self.WHITE), self.ICE, 10, 0.45)
+                 for i, w in enumerate(CAPTION)]
+        place(im, row(words, gap=4), W / 2, CAM_H - 112, "cm")
+        hk = stack([self.chrome(HOOK[0], 80), self.chrome(HOOK[1], 80)], gap=-10)
+        place(im, fit(hk, w=1020), W / 2, CAM_H + 70, "ct")
+        return im
+
+
+class Mono:
+    key, name = "F", "Mono"
+    pitch = "Swiss and calm: lowercase 'rift daily.' in a characterful grotesk, black and white only, sharp labels."
+    BLACK, WHITE, GREY = (12, 12, 12), (250, 250, 248), (150, 150, 150)
+    palette = [("Black", BLACK), ("White", WHITE), ("Grey", GREY)]
+    fonts = "Bricolage Grotesque"
+    wordmark_on = WHITE
+
+    def f(self, size, weight=800):
+        return gfont("Bricolage Grotesque", weight, size)
+
+    def wordmark(self, h=200):
+        return text("rift daily.", self.f(h), self.BLACK)
+
+    def avatar(self, s=800):
+        im = Image.new("RGBA", (s, s), self.BLACK + (255,))
+        place(im, text("rd.", self.f(s * 0.42), self.WHITE), s * 0.52, s * 0.47, "cm")
+        return im.convert("RGB")
+
+    def banner(self):
+        bw, bh = 2560, 1440
+        im = Image.new("RGBA", (bw, bh), self.WHITE + (255,))
+        wm = fit(text("rift daily.", self.f(300), self.BLACK), w=1400)
+        place(im, wm, 580, 700, "lb")
+        place(im, text("league's best clips. every day.", self.f(56, 500), self.GREY), 586, 740, "lt")
+        return im.convert("RGB")
+
+    def label(self, t, size=34, fg=None, bg=None):
+        tx = text(t, self.f(size, 700), fg or self.BLACK)
+        box = Image.new("RGBA", (tx.width + 36, tx.height + 22), (bg or self.WHITE) + (255,))
+        place(box, tx, 18, box.height / 2, "lm")
+        return box
+
+    def overlay(self, frame):
+        im = frame.copy()
+        place(im, self.label("rift daily.", 34), 24, CAM_H, "lm")
+        place(im, self.label("clip — midbeast", 30), W - 24, CAM_H, "rm")
+        f = self.f(84)
+        words, xs = [], []
+        for i, w in enumerate(CAPTION):
+            t = text(w.lower(), f, self.WHITE)
+            if i == ACTIVE:
+                u = Image.new("RGBA", (t.width, t.height + 22), (0, 0, 0, 0))
+                u.alpha_composite(t, (0, 0))
+                ImageDraw.Draw(u).rectangle([0, u.height - 10, u.width, u.height], fill=self.WHITE + (255,))
+                t = u
+            words.append(t)
+        place(im, soft_shadow(row(words, gap=22), 10, 0.75, 3), W / 2, CAM_H - 112, "cm")
+        hk = stack([self.label(HOOK[0].lower(), 70), self.label(HOOK[1].lower(), 70)], gap=0, align="l")
+        place(im, fit(hk, w=1000), 24, CAM_H + 70, "lt")
+        return im
+
+
+class Esports:
+    key, name = "G", "Esports"
+    pitch = "Built like a team jersey: an angular crest with chevrons, crimson and black, heavy italic type."
+    BLACK, CRIMSON, WHITE, STEEL, DARK = (10, 10, 12), (226, 24, 56), (245, 245, 247), (100, 104, 114), (30, 30, 36)
+    palette = [("Crimson", CRIMSON), ("Black", BLACK), ("White", WHITE), ("Steel", STEEL)]
+    fonts = "Kanit Black Italic · Teko"
+
+    def crest(self, h):
+        w, k = int(h * 0.9), 3
+        S = Image.new("RGBA", (w * k, h * k), (0, 0, 0, 0))
+        d = ImageDraw.Draw(S)
+        P = lambda pts: [(x * w * k, y * h * k) for x, y in pts]  # noqa: E731
+        d.polygon(P([(0.12, 0), (0.88, 0), (1, 0.16), (1, 0.62), (0.5, 1), (0, 0.62), (0, 0.16)]),
+                  fill=self.CRIMSON + (255,))
+        d.polygon(P([(0.18, 0.08), (0.82, 0.08), (0.91, 0.2), (0.91, 0.58), (0.5, 0.89), (0.09, 0.58), (0.09, 0.2)]),
+                  fill=self.BLACK + (255,))
+        for i in range(2):
+            y = 0.66 + i * 0.1
+            d.polygon(P([(0.26, y), (0.5, y + 0.12), (0.74, y), (0.74, y + 0.05), (0.5, y + 0.17), (0.26, y + 0.05)]),
+                      fill=self.CRIMSON + (255,))
+        S = S.resize((w, h), Image.LANCZOS)
+        place(S, text("RD", gfont("Kanit", 900, h * 0.38, italic=True), self.WHITE), w / 2, h * 0.37, "cm")
+        return S
+
+    def wordmark(self, h=200):
+        f = gfont("Kanit", 900, h, italic=True)
+        return row([text("RIFT", f, self.WHITE), text("DAILY", f, self.CRIMSON)], gap=int(h * 0.12))
+
+    def slashes(self, w, h, n, alpha=255):
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        for i in range(n):
+            x = w * (0.55 + i * 0.12)
+            d.polygon([(x, 0), (x + w * 0.06, 0), (x - h * 0.6 + w * 0.06, h), (x - h * 0.6, h)],
+                      fill=self.CRIMSON + (alpha if i == 0 else alpha // (i + 1),))
+        return im
+
+    def avatar(self, s=800):
+        im = Image.new("RGBA", (s, s), self.BLACK + (255,))
+        im.alpha_composite(self.slashes(s, s, 3, 150))
+        place(im, self.crest(int(s * 0.7)), s / 2, s / 2, "cm")
+        return im.convert("RGB")
+
+    def banner(self):
+        bw, bh = 2560, 1440
+        im = Image.new("RGBA", (bw, bh), self.BLACK + (255,))
+        im.alpha_composite(self.slashes(bw, bh, 4, 170))
+        c = self.crest(340)
+        place(im, c, 580, 720, "lm")
+        wm = fit(self.wordmark(220), w=1100)
+        place(im, wm, 580 + c.width + 50, 700, "lb")
+        tag = text("LEAGUE'S BEST CLIPS  //  EVERY DAY", gfont("Teko", 600, 64), self.STEEL, spacing=0.08)
+        place(im, tag, 580 + c.width + 64, 742, "lt")
+        return im.convert("RGB")
+
+    def overlay(self, frame):
+        im = frame.copy()
+        band = slanted(W + 120, 74, self.BLACK + (238,), 0.4)
+        d = ImageDraw.Draw(band)
+        for i in range(3):
+            x = 360 + i * 22
+            d.polygon([(x, 0), (x + 12, 0), (x - 18, 74), (x - 30, 74)], fill=self.CRIMSON + (255 - i * 60,))
+        place(im, band, -60, CAM_H, "lm")
+        place(im, self.crest(64), 26, CAM_H, "lm")
+        place(im, text("RIFT DAILY", gfont("Kanit", 900, 38, italic=True), self.WHITE), 96, CAM_H, "lm")
+        cr = row([text("CLIP", gfont("Kanit", 800, 30, italic=True), self.CRIMSON),
+                  text(CREDIT, gfont("Kanit", 700, 32, italic=True), self.WHITE)], gap=12)
+        place(im, cr, W - 30, CAM_H, "rm")
+        f = gfont("Kanit", 900, 86, italic=True)
+        words = [text(w, f, self.CRIMSON if i == ACTIVE else self.WHITE, stroke=8, stroke_fill=self.BLACK)
+                 for i, w in enumerate(CAPTION)]
+        place(im, row(words, gap=16), W / 2, CAM_H - 112, "cm")
+        f2 = gfont("Kanit", 900, 96, italic=True)
+        hk = stack([text(HOOK[0], f2, self.WHITE, stroke=8, stroke_fill=self.BLACK),
+                    text(HOOK[1], f2, self.CRIMSON, stroke=8, stroke_fill=self.BLACK)], gap=-14)
+        place(im, fit(hk, w=1000), W / 2, CAM_H + 76, "ct")
+        return im
+
+
 OPTIONS = [Sticker(), Broadcast(), Arcade(), Street()]
+ROUND2 = [NightGame(), Championship(), Daylight(), Chrome(), Mono(), Esports()]
 
 
 # -- boards --------------------------------------------------------------------------------------------------------
@@ -653,10 +1131,11 @@ def board(o, frame: Image.Image) -> Image.Image:
     return im.convert("RGB")
 
 
-def overview(frame: Image.Image) -> Image.Image:
+def overview(frame: Image.Image, options=None) -> Image.Image:
+    options = options or OPTIONS
     col_w, bh = 620, 1500
-    im = Image.new("RGBA", (col_w * 4 + 100, bh), (22, 22, 24, 255))
-    for i, o in enumerate(OPTIONS):
+    im = Image.new("RGBA", (col_w * len(options) + 100, bh), (22, 22, 24, 255))
+    for i, o in enumerate(options):
         x = 50 + i * col_w
         place(im, text(f"{o.key}  {o.name.upper()}", font("barlow_black", 64), (245, 245, 245)), x + col_w / 2 - 25,
               40, "ct")
@@ -666,15 +1145,23 @@ def overview(frame: Image.Image) -> Image.Image:
     return im.convert("RGB")
 
 
-def main():
+def main(rounds=("1", "2")):
     OUT.mkdir(parents=True, exist_ok=True)
     frame = base_frame()
-    for o in OPTIONS:
-        board(o, frame).save(OUT / f"board-{o.key}-{o.name.lower()}.jpg", quality=90)
-        print("board", o.key, o.name)
-    overview(frame).save(OUT / "overview.jpg", quality=90)
-    print("overview")
+    if "1" in rounds:
+        for o in OPTIONS:
+            board(o, frame).save(OUT / f"board-{o.key}-{o.name.lower()}.jpg", quality=90)
+            print("board", o.key, o.name)
+        overview(frame).save(OUT / "overview.jpg", quality=90)
+    if "2" in rounds:
+        for o in ROUND2:
+            slug = o.name.lower().replace(" ", "-")
+            board(o, frame).save(OUT / f"board-{o.key}-{slug}.jpg", quality=90)
+            print("board", o.key, o.name)
+        overview(frame, [OPTIONS[1]] + ROUND2[:3]).save(OUT / "overview-like-b.jpg", quality=90)
+        overview(frame, ROUND2[3:]).save(OUT / "overview-new.jpg", quality=90)
+    print("overviews")
 
 
 if __name__ == "__main__":
-    main()
+    main(tuple(sys.argv[1:]) or ("1", "2"))
