@@ -26,9 +26,14 @@ Walk the ranking, most viewed first, one clip per moment, and take each clip unl
 - the check says `music` or `song`: look and listen first, and a song on stream is a skip;
 - it has a slur, abuse read out, or a title saying a slur was heard (the check's `unpostable` list is a start, not
   the whole read);
-- it's another streamer's stream shown inside this one, a spectated game too small to read on a phone, or an
-  official esports broadcast (Riot claims those).
+- it's another streamer's stream shown inside this one, or an official esports broadcast (Riot claims those).
 A clip with no webcam is fine. Write the picks and the skips, each with its reason, in `runs/<date>.md`.
+
+Judge the play, not how big it looks: the vertical crop zooms in anyway (about 640 px of a 1080p stream fill the
+phone's width). When the kill feed shows a kill the contact sheet doesn't explain, look closer (frames every half
+second around it) before deciding. A pro's play on a streamer's spectate counts: the owner's favourite of the first
+run was midbeast spectating T1 Peyz (Kalista spears stacked on the Gromp, a Q through it, Jax one-shot), which had been
+skipped as "too small to read on a phone" (2026-11-03).
 
 ## Rules
 - Twitch credentials come from the environment only (`TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`). Never print, log or
