@@ -40,6 +40,12 @@ The look and the name are being picked with the owner, round by round (2026-11-0
   (@torvanlol), Venrix (@venrixlol), Solvyn (@solvynlol). Out: Vaxon (a biotech company), Lyrion (a music server), Kovex
   (small Czech firms), Nirox (Google turns it into NIOX, a pharma company); taken on TikTok even with "lol": Kyrel,
   Nyxen, Saelo, Ryvex.
+- "why do they all look the asme lol, real varied options plz" (2026-11-04): other kinds of word, each free with "lol"
+  on TikTok and YouTube and no game or channel of that name found: real words like Synapse, Kestrel (@kestrellol),
+  Rigel (@rigellol), Basalt (@basaltlol: only a small indie game); short ones, Ibex (@ibexlol: a one-person indie
+  studio), Ninth (@ninthlol), Blip (@bliplol: Blip.tv, shut in 2015). Out for a game or channel of the same name:
+  Vellum, Marrow, Vigil, Halcyon, Quarry, Sable. Every name-style one was taken, even with "gg": Juno, Otto, Remy,
+  Milo, Theo, Arlo, Oskar, Enzo, Nico, Ezra.
 
 This file changes to the name and look picked.
 
