@@ -146,8 +146,11 @@ Follow @bliplol for the next one ⚡
 - Clips with music playing on stream are skipped (Content ID claims them, TikTok mutes them).
 - Bigger streamers: one message asking if they're fine with their clips on the channel, credited; most say yes.
 - A takedown request is done within 24 hours, no argument.
-- YouTube can refuse monetization for "reused content" (other people's videos without much added). The captions, the
-  hook and the credit help; they don't guarantee it.
+- Monetization (checked 2026-11-04): YouTube's reused content policy refuses channels of other people's clips with
+  little added, "even if you have permission from the original creator", and judges the whole channel; captions, a
+  hook and a credit don't change that, your own commentary or a storyline over the clips does. TikTok's Creator
+  Rewards pay only for original videos over a minute; Instagram stops recommending accounts that mostly repost
+  (2026-04-30). The streamer's permission is still worth asking for: it keeps copyright strikes away.
 
 ## Setup checklist
 1. A brand email for all three accounts and for CONTACT_EMAIL (e.g. a new Gmail).
