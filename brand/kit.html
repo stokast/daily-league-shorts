@@ -1,11 +1,11 @@
-<title>Rift Daily Brand Kit</title>
+<title>Blip Brand Kit</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700;800;900&family=Chakra+Petch:ital,wght@1,700&family=Inter:wght@400;500;600;800&display=swap">
 <style>
-/* Layout: a one-column field kit on the brand's own Rift Night. The banner's safe band opens the page;
-   hex-cut corners (top-left and bottom-right, the rift's diagonal) mark everything you copy or save. */
+/* Layout: a one-column field kit on the brand's own Night, opened by the banner's safe band. Tiles are rounded like
+   the credit tag, the buttons are pills, and a small ping (a dot in two rings) marks each list item. */
 :root {
   color-scheme: dark;
   --night: #0A0F1E;
@@ -14,23 +14,28 @@
   --rule: #24324F;
   --cyan: #18E6FF;
   --cyan-hi: #8AF3FF;
+  --cyan-ring: rgba(24, 230, 255, 0.3);
+  --cyan-ring-2: rgba(24, 230, 255, 0.12);
   --on-cyan: #03141A;
   --gold: #F5C542;
   --gold-wash: rgba(245, 197, 66, 0.14);
   --mist: #A0B2D2;
   --white: #F4F7FF;
   --hot: #FF6B7D;
-  --display: "Chakra Petch", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --paper: #F4F7FF;
+  --paper-rule: #D3DCEC;
+  --display: "Urbanist", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --hook: "Chakra Petch", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
-  --cut: 12px;
+  --r: 14px;
 }
 * { box-sizing: border-box; }
 body { background: var(--night); color: var(--white); font: 400 15px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
 a { color: var(--cyan); }
 :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.cut { clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+.tile { border-radius: var(--r); }
 
 /* hero: the banner's middle band */
 .hero { max-width: 1100px; margin: 0 auto; }
@@ -43,23 +48,23 @@ a { color: var(--cyan); }
 .hero-crop img { position: absolute; max-width: none; width: 142.2%; height: auto; left: -21.1%; top: 50%; transform: translateY(-50%); }
 
 .wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 4px 72px; }
-.eyebrow { font: 600 12px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 0 0 10px; }
+.eyebrow { font: 800 12px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); margin: 0 0 10px; }
 .lede { font-size: 18px; line-height: 1.5; max-width: 60ch; margin: 0; text-wrap: pretty; }
 .toc { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--rule); }
-.toc a { font: 600 13px/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); text-decoration: none; padding: 8px 0; }
+.toc a { font: 800 13px/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); text-decoration: none; padding: 8px 0; }
 .toc a:hover { color: var(--cyan); }
 
 section { padding-top: 48px; scroll-margin-top: 12px; }
-h2 { font: italic 700 clamp(26px, 4.4vw, 34px)/1.05 var(--display); text-transform: uppercase; letter-spacing: 0.01em; margin: 0; text-wrap: balance; }
+h2 { font: 900 clamp(28px, 4.6vw, 38px)/1.05 var(--display); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
 .sub { color: var(--mist); margin: 8px 0 22px; max-width: 62ch; }
-h3 { font: 700 17px/1.25 var(--display); letter-spacing: 0.02em; margin: 0; }
-.subhead { font: 600 12px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 30px 0 12px; }
-.label { font: 600 12px/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mist); }
+h3 { font: 800 18px/1.25 var(--display); margin: 0; }
+.subhead { font: 800 12px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); margin: 30px 0 12px; }
+.label { font: 800 12px/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mist); }
 .hint { color: var(--mist); font-size: 13px; line-height: 1.45; margin: 0; }
 p { text-wrap: pretty; }
 
 /* buttons */
-.btn { display: inline-flex; align-items: center; gap: 6px; flex: none; font: 600 12px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-cyan); background: var(--cyan); border: 0; border-radius: 3px; padding: 9px 12px; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 6px; flex: none; font: 800 12px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-cyan); background: var(--cyan); border: 0; border-radius: 999px; padding: 9px 14px; cursor: pointer; }
 .btn:hover { background: var(--cyan-hi); }
 .btn.done { background: var(--gold); }
 .btn:disabled { cursor: progress; opacity: 0.8; }
@@ -74,27 +79,28 @@ p { text-wrap: pretty; }
 /* colours and type */
 .swatches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .swatch { display: grid; gap: 8px; align-content: start; text-align: left; background: var(--deck); color: var(--white); border: 0; padding: 12px; cursor: pointer; font: inherit; }
+.swatch:focus-visible { outline-offset: 2px; }
 .swatch:hover .chip-c { transform: translateY(-2px); }
-.chip-c { height: 46px; background: var(--c); box-shadow: inset 0 0 0 1px var(--rule); transition: transform 0.15s ease; }
-.swatch b { font: 700 14px/1.2 var(--display); letter-spacing: 0.02em; }
+.chip-c { height: 46px; border-radius: 8px; background: var(--c); box-shadow: inset 0 0 0 1px var(--rule); transition: transform 0.15s ease; }
+.swatch b { font: 800 15px/1.2 var(--display); }
 .swatch .hex { font: 500 12px/1 var(--mono); color: var(--gold); }
 .swatch .use { font-size: 12px; color: var(--mist); line-height: 1.35; }
-.swatch .state { font: 600 11px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan); min-height: 11px; }
+.swatch .state { font: 800 11px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan); min-height: 11px; }
 .types { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
 .type { background: var(--deck); padding: 16px; display: grid; gap: 10px; align-content: space-between; min-width: 0; }
-.type-a { font: italic 700 38px/1 var(--display); letter-spacing: 0.01em; }
-.type-a span { color: var(--cyan); }
-.type-b { font: 600 15px/1.2 var(--display); letter-spacing: 0.1em; color: var(--gold); }
+.type-a { font: 900 40px/1 var(--display); letter-spacing: 0.02em; color: var(--gold); }
+.type-b { font: italic 700 22px/1.1 var(--hook); color: var(--cyan); }
 .type-c { font: 800 21px/1.1 var(--body); overflow-wrap: anywhere; }
 .voice { max-width: 62ch; margin: 0; font-size: 16px; }
 
 /* images */
 .save-note { margin: -8px 0 18px; color: var(--gold); font-size: 13px; }
 .assets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.asset { background: var(--deck); display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.asset { background: var(--deck); display: grid; grid-template-rows: auto 1fr; min-width: 0; overflow: hidden; }
 .asset-wide { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-rows: none; }
 .stage { min-height: 190px; display: flex; align-items: center; justify-content: center; gap: 20px; padding: 22px;
   background-color: var(--deck-2); background-image: radial-gradient(var(--rule) 1px, transparent 1.5px); background-size: 14px 14px; }
+.stage-light { background-color: var(--paper); background-image: radial-gradient(var(--paper-rule) 1px, transparent 1.5px); }
 .asset-wide .stage { padding: 18px; }
 .banner-box { position: relative; width: 100%; }
 .banner-box img { display: block; width: 100%; height: auto; }
@@ -112,7 +118,7 @@ p { text-wrap: pretty; }
 .setonce { background: var(--deck); padding: 16px 18px 18px; margin-bottom: 22px; display: grid; gap: 12px; }
 .setonce-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .in { display: grid; gap: 6px; min-width: 0; }
-.in label { font: 600 12px/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mist); }
+.in label { font: 800 12px/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mist); }
 input[type="text"], input[type="email"] { width: 100%; min-width: 0; font: 500 16px/1.3 var(--body); color: var(--white); background: var(--deck-2); border: 1px solid var(--rule); border-radius: 4px; padding: 11px 12px; }
 input::placeholder { color: var(--mist); opacity: 0.7; }
 input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2px solid var(--cyan); outline-offset: 0; border-color: transparent; }
@@ -121,7 +127,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 .prefixed input { border-radius: 0 4px 4px 0; }
 
 .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 18px; overflow-x: auto; }
-.tab { font: 700 15px/1 var(--display); letter-spacing: 0.04em; color: var(--mist); background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 13px 14px; cursor: pointer; white-space: nowrap; }
+.tab { font: 800 16px/1 var(--display); letter-spacing: 0.01em; color: var(--mist); background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 13px 14px; cursor: pointer; white-space: nowrap; }
 .tab:hover { color: var(--white); }
 .tab[aria-selected="true"] { color: var(--white); border-bottom-color: var(--cyan); }
 .panel { display: grid; gap: 12px; }
@@ -140,7 +146,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 
 .settings { list-style: none; margin: 6px 0 0; padding: 0; display: grid; border-top: 1px solid var(--rule); }
 .settings li { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 4px 16px; padding: 12px 2px; border-bottom: 1px solid var(--rule); }
-.settings .k { font: 600 12px/1.5 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mist); }
+.settings .k { font: 800 12px/1.5 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mist); }
 .settings .d { margin: 0; }
 .settings .d small { display: block; color: var(--mist); font-size: 13px; margin-top: 2px; }
 
@@ -152,16 +158,16 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 .chip { font: 500 13px/1 var(--body); color: var(--white); background: var(--deck-2); border: 1px solid var(--rule); border-radius: 999px; padding: 7px 10px; cursor: pointer; }
 .chip:hover { border-color: var(--cyan); }
 .chip span { color: var(--mist); }
-.example { font: 600 11px/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin: 0; }
+.example { font: 800 11px/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin: 0; }
 .outputs { display: grid; gap: 12px; }
 .rule-text { margin: 16px 0 0; max-width: 64ch; color: var(--mist); }
 .rule-text strong { color: var(--white); }
 
 /* setup */
-.progress { font: 600 12px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan); white-space: nowrap; }
+.progress { font: 800 12px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan); white-space: nowrap; }
 .groups { display: grid; gap: 22px; }
 .group { border: 0; margin: 0; padding: 0; min-width: 0; }
-.group legend { font: 600 12px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); padding: 0; margin-bottom: 8px; }
+.group legend { font: 800 12px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); padding: 0; margin-bottom: 8px; }
 .check { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; padding: 11px 2px; border-top: 1px solid var(--rule); cursor: pointer; }
 .check:last-child { border-bottom: 1px solid var(--rule); }
 .check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--cyan); cursor: pointer; }
@@ -172,8 +178,10 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 /* rules */
 .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
 .rules { background: var(--deck); padding: 18px; }
-.rules ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 9px; }
-.rules li::marker { color: var(--cyan); }
+.rules ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.rules li { position: relative; padding-left: 22px; }
+.rules li::before { content: ""; position: absolute; left: 5px; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 0 3px var(--deck), 0 0 0 4.5px var(--cyan-ring), 0 0 0 7px var(--deck), 0 0 0 8.5px var(--cyan-ring-2); }
 .foot { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--mist); font-size: 13px; }
 .foot code { font: 500 12px var(--mono); color: var(--white); }
 
@@ -196,11 +204,11 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 </style>
 
 <header class="hero">
-  <div class="hero-crop"><div><img src="out/rift-daily-youtube-banner-2560x1440.png" width="2560" height="1440" alt="The Rift Daily banner: a hexagon split by a glowing rift crack around a play button, and the words RIFT DAILY."></div></div>
+  <div class="hero-crop"><div><img src="out/blip-youtube-banner-2560x1440.png" width="2560" height="1440" alt="The Blip banner: the word blip in white, its i dotted with a cyan ping whose rings spread out over a faint map grid."></div></div>
 </header>
 
 <div class="wrap">
-  <h1 class="sr">Rift Daily brand kit</h1>
+  <h1 class="sr">Blip brand kit</h1>
   <p class="eyebrow">Brand kit · YouTube Shorts · TikTok · Instagram Reels</p>
   <p class="lede">Everything the three accounts need: the images to upload, the texts to paste, and the captions for each day's clip. One clip per short, its streamer credited on screen and in the text.</p>
   <nav class="toc" aria-label="Sections">
@@ -216,32 +224,32 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
     <h2 id="h-identity">Identity</h2>
     <p class="sub">The same name, handle and look on all three.</p>
     <dl class="facts">
-      <div class="fact cut">
+      <div class="fact tile">
         <dt class="label">Name</dt>
-        <dd><span class="val" id="f-name">Rift Daily</span><button class="btn" type="button" data-copy-from="f-name" aria-label="Copy the name">Copy</button></dd>
+        <dd><span class="val" id="f-name">Blip</span><button class="btn" type="button" data-copy-from="f-name" aria-label="Copy the name">Copy</button></dd>
         <p class="hint">The channel and account name everywhere.</p>
       </div>
-      <div class="fact cut">
+      <div class="fact tile">
         <dt class="label">Handle</dt>
-        <dd><span class="val" id="f-handle">@riftdaily</span><button class="btn" type="button" data-copy-from="f-handle" aria-label="Copy the handle">Copy</button></dd>
-        <p class="hint">Taken on YouTube and TikTok (checked 3 Nov 2026): the name is being picked again.</p>
+        <dd><span class="val" id="f-handle">@bliplol</span><button class="btn" type="button" data-copy-from="f-handle" aria-label="Copy the handle">Copy</button></dd>
+        <p class="hint">Free on TikTok and YouTube (checked 4 Nov 2026). Instagram can't be checked from here: if it's taken there, change the Instagram handle under Profiles and every text follows.</p>
       </div>
     </dl>
 
     <p class="subhead">Colours · tap one to copy its hex</p>
     <div class="swatches">
-      <button class="swatch cut" type="button" data-copy-from="hex-night" style="--c: #0A0F1E"><span class="chip-c"></span><b>Rift Night</b><span class="hex" id="hex-night">#0A0F1E</span><span class="use">Backgrounds, the credit tag</span><span class="state" aria-live="polite"></span></button>
-      <button class="swatch cut" type="button" data-copy-from="hex-cyan" style="--c: #18E6FF"><span class="chip-c"></span><b>Rift Cyan</b><span class="hex" id="hex-cyan">#18E6FF</span><span class="use">The main colour: DAILY, highlights</span><span class="state" aria-live="polite"></span></button>
-      <button class="swatch cut" type="button" data-copy-from="hex-gold" style="--c: #F5C542"><span class="chip-c"></span><b>Hextech Gold</b><span class="hex" id="hex-gold">#F5C542</span><span class="use">The accent: CLIP</span><span class="state" aria-live="polite"></span></button>
-      <button class="swatch cut" type="button" data-copy-from="hex-mist" style="--c: #A0B2D2"><span class="chip-c"></span><b>Mist</b><span class="hex" id="hex-mist">#A0B2D2</span><span class="use">Secondary text on navy</span><span class="state" aria-live="polite"></span></button>
-      <button class="swatch cut" type="button" data-copy-from="hex-white" style="--c: #F4F7FF"><span class="chip-c"></span><b>White</b><span class="hex" id="hex-white">#F4F7FF</span><span class="use">Text</span><span class="state" aria-live="polite"></span></button>
+      <button class="swatch tile" type="button" data-copy-from="hex-night" style="--c: #0A0F1E"><span class="chip-c"></span><b>Night</b><span class="hex" id="hex-night">#0A0F1E</span><span class="use">Backgrounds, the credit tag</span><span class="state" aria-live="polite"></span></button>
+      <button class="swatch tile" type="button" data-copy-from="hex-cyan" style="--c: #18E6FF"><span class="chip-c"></span><b>Ping</b><span class="hex" id="hex-cyan">#18E6FF</span><span class="use">The main colour: the i's dot and its rings, highlights</span><span class="state" aria-live="polite"></span></button>
+      <button class="swatch tile" type="button" data-copy-from="hex-gold" style="--c: #F5C542"><span class="chip-c"></span><b>Gold</b><span class="hex" id="hex-gold">#F5C542</span><span class="use">The accent: CLIP, the spoken word in captions</span><span class="state" aria-live="polite"></span></button>
+      <button class="swatch tile" type="button" data-copy-from="hex-mist" style="--c: #A0B2D2"><span class="chip-c"></span><b>Mist</b><span class="hex" id="hex-mist">#A0B2D2</span><span class="use">Secondary text on navy</span><span class="state" aria-live="polite"></span></button>
+      <button class="swatch tile" type="button" data-copy-from="hex-white" style="--c: #F4F7FF"><span class="chip-c"></span><b>White</b><span class="hex" id="hex-white">#F4F7FF</span><span class="use">The name, text</span><span class="state" aria-live="polite"></span></button>
     </div>
 
     <p class="subhead">Type</p>
     <div class="types">
-      <div class="type cut"><p class="type-a" style="margin:0">RIFT <span>DAILY</span></p><p class="hint">Chakra Petch Bold Italic · the name and titles</p></div>
-      <div class="type cut"><p class="type-b" style="margin:0">CLIP&nbsp;· LABELS</p><p class="hint">Chakra Petch SemiBold · labels</p></div>
-      <div class="type cut"><p class="type-c" style="margin:0">twitch.tv/streamer</p><p class="hint">Inter ExtraBold · captions and the credit</p></div>
+      <div class="type tile"><p class="type-a" style="margin:0">CLIP</p><p class="hint">Urbanist Black · the name and CLIP</p></div>
+      <div class="type tile"><p class="type-b" style="margin:0">THROUGH A GROMP</p><p class="hint">Chakra Petch Bold Italic · the hook on each short</p></div>
+      <div class="type tile"><p class="type-c" style="margin:0">twitch.tv/streamer</p><p class="hint">Inter ExtraBold · captions and the credit</p></div>
     </div>
     <p class="hint" style="margin-top:10px">All three are free under the SIL Open Font License; the files are in <code>brand/fonts/</code>.</p>
 
@@ -251,78 +259,103 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 
   <section id="images" aria-labelledby="h-images">
     <h2 id="h-images">Images</h2>
-    <p class="sub">Save each one and upload it where its card says. The mark, wordmark and tags have transparent backgrounds.</p>
+    <p class="sub">Save each one and upload it where its card says. The watermark, the mark, the wordmarks and the tags have transparent backgrounds.</p>
     <p class="save-note" id="save-note" hidden>Saving isn't available in this view. The same files are in the chat this kit came from.</p>
     <div class="assets">
-      <article class="asset asset-wide cut">
-        <div class="stage"><div class="banner-box"><img src="out/rift-daily-youtube-banner-2560x1440.png" width="2560" height="1440" alt=""><span class="safe" aria-hidden="true"></span></div></div>
+      <article class="asset asset-wide tile">
+        <div class="stage"><div class="banner-box"><img src="out/blip-youtube-banner-2560x1440.png" width="2560" height="1440" alt=""><span class="safe" aria-hidden="true"></span></div></div>
         <div class="asset-meta">
           <h3>YouTube banner</h3>
           <p class="dims">2560 × 1440 PNG · safe area 1546 × 423</p>
           <p>YouTube Studio › Customisation › Branding › Banner image.</p>
-          <p>The dashed box is the part every device shows. The mark and the name sit inside it.</p>
-          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/rift-daily-youtube-banner-2560x1440.png" data-name="rift-daily-youtube-banner-2560x1440.png">Save</button></div>
+          <p>The dashed box is the part every device shows: the name sits inside it. The rings and the other pings round it show on wider screens.</p>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-youtube-banner-2560x1440.png" data-name="blip-youtube-banner-2560x1440.png">Save</button></div>
         </div>
       </article>
-      <article class="asset cut">
+      <article class="asset tile">
         <div class="stage stage-avatar">
-          <img class="av" src="out/rift-daily-avatar-800.png" width="112" height="112" alt="">
-          <img class="av" src="out/rift-daily-avatar-800.png" width="48" height="48" alt="">
-          <img class="av" src="out/rift-daily-avatar-800.png" width="32" height="32" alt="">
+          <img class="av" src="out/blip-avatar-800.png" width="112" height="112" alt="">
+          <img class="av" src="out/blip-avatar-800.png" width="48" height="48" alt="">
+          <img class="av" src="out/blip-avatar-800.png" width="32" height="32" alt="">
         </div>
         <div class="asset-meta">
           <h3>Profile picture</h3>
-          <p class="dims">800 × 800 PNG</p>
-          <p>YouTube, TikTok and Instagram. Each crops it to a circle; the mark sits inside the circle and still reads at 32 px.</p>
-          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/rift-daily-avatar-800.png" data-name="rift-daily-avatar-800.png">Save</button></div>
+          <p class="dims">800 × 800 PNG, and 400 × 400</p>
+          <p>YouTube, TikTok and Instagram. Each crops it to a circle; the name sits inside it and still reads at 32 px.</p>
+          <div class="save-row">
+            <button class="btn save-btn" type="button" data-save="out/blip-avatar-800.png" data-name="blip-avatar-800.png">Save 800 px</button>
+            <button class="btn save-btn" type="button" data-save="out/blip-avatar-400.png" data-name="blip-avatar-400.png">Save 400 px</button>
+          </div>
         </div>
       </article>
-      <article class="asset cut">
-        <div class="stage"><img src="out/rift-daily-youtube-watermark-150.png" width="96" height="96" alt=""></div>
+      <article class="asset tile">
+        <div class="stage stage-avatar">
+          <img class="av" src="out/blip-avatar-ping-800.png" width="112" height="112" alt="">
+          <img class="av" src="out/blip-avatar-ping-800.png" width="48" height="48" alt="">
+          <img class="av" src="out/blip-avatar-ping-800.png" width="32" height="32" alt="">
+        </div>
+        <div class="asset-meta">
+          <h3>Profile picture, the ping</h3>
+          <p class="dims">800 × 800 PNG</p>
+          <p>The same with the ping instead of the name, if you'd rather have a symbol. Use one of the two on all three accounts.</p>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-avatar-ping-800.png" data-name="blip-avatar-ping-800.png">Save</button></div>
+        </div>
+      </article>
+      <article class="asset tile">
+        <div class="stage"><img src="out/blip-youtube-watermark-150.png" width="96" height="96" alt=""></div>
         <div class="asset-meta">
           <h3>Video watermark</h3>
           <p class="dims">150 × 150 PNG</p>
           <p>YouTube Studio › Customisation › Branding › Video watermark, display time Entire video. It shows on regular videos; the Shorts player leaves it out.</p>
-          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/rift-daily-youtube-watermark-150.png" data-name="rift-daily-youtube-watermark-150.png">Save</button></div>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-youtube-watermark-150.png" data-name="blip-youtube-watermark-150.png">Save</button></div>
         </div>
       </article>
-      <article class="asset cut">
-        <div class="stage"><img src="out/rift-daily-mark-512.png" width="150" height="150" alt=""></div>
+      <article class="asset tile">
+        <div class="stage"><img src="out/blip-mark-512.png" width="150" height="150" alt=""></div>
         <div class="asset-meta">
           <h3>The mark</h3>
           <p class="dims">2048 × 2048 and 512 × 512 PNG</p>
-          <p>The logo alone, for anything else: Discord, a website, a sticker.</p>
+          <p>The ping alone, for any square spot: Discord, a website, a sticker.</p>
           <div class="save-row">
-            <button class="btn save-btn" type="button" data-save="out/rift-daily-mark-2048.png" data-name="rift-daily-mark-2048.png">Save 2048 px</button>
-            <button class="btn save-btn" type="button" data-save="out/rift-daily-mark-512.png" data-name="rift-daily-mark-512.png">Save 512 px</button>
+            <button class="btn save-btn" type="button" data-save="out/blip-mark-2048.png" data-name="blip-mark-2048.png">Save 2048 px</button>
+            <button class="btn save-btn" type="button" data-save="out/blip-mark-512.png" data-name="blip-mark-512.png">Save 512 px</button>
           </div>
         </div>
       </article>
-      <article class="asset cut">
-        <div class="stage"><img src="out/rift-daily-wordmark.png" width="1663" height="232" alt="" style="width:86%;height:auto"></div>
+      <article class="asset tile">
+        <div class="stage"><img src="out/blip-wordmark.png" width="712" height="477" alt="" style="width:58%;height:auto"></div>
         <div class="asset-meta">
           <h3>Wordmark</h3>
-          <p class="dims">1663 × 232 PNG</p>
-          <p>The name alone, for anywhere the mark needs words next to it.</p>
-          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/rift-daily-wordmark.png" data-name="rift-daily-wordmark.png">Save</button></div>
+          <p class="dims">712 × 477 PNG</p>
+          <p>The name alone, for dark backgrounds.</p>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-wordmark.png" data-name="blip-wordmark.png">Save</button></div>
         </div>
       </article>
-      <article class="asset cut">
-        <div class="stage"><img src="out/rift-daily-corner-bug.png" width="167" height="56" alt=""></div>
+      <article class="asset tile">
+        <div class="stage stage-light"><img src="out/blip-wordmark-dark.png" width="712" height="477" alt="" style="width:58%;height:auto"></div>
+        <div class="asset-meta">
+          <h3>Wordmark on light</h3>
+          <p class="dims">712 × 477 PNG</p>
+          <p>Navy letters and a deeper cyan ping, for white or light backgrounds.</p>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-wordmark-dark.png" data-name="blip-wordmark-dark.png">Save</button></div>
+        </div>
+      </article>
+      <article class="asset tile">
+        <div class="stage"><img src="out/blip-corner-bug.png" width="148" height="113" alt=""></div>
         <div class="asset-meta">
           <h3>Corner tag</h3>
-          <p class="dims">334 × 112 PNG</p>
-          <p>Sits in the top corner of every short, so the brand shows on Shorts too. The clip pipeline adds it.</p>
-          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/rift-daily-corner-bug.png" data-name="rift-daily-corner-bug.png">Save</button></div>
+          <p class="dims">148 × 113 PNG</p>
+          <p>The name on every short, at the left end of the line between the cam and the play, so the brand shows on Shorts too. The clip pipeline adds it.</p>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-corner-bug.png" data-name="blip-corner-bug.png">Save</button></div>
         </div>
       </article>
-      <article class="asset cut">
-        <div class="stage"><img src="out/rift-daily-credit-pill-sample.png" width="262" height="61" alt=""></div>
+      <article class="asset tile">
+        <div class="stage"><img src="out/blip-credit-pill-sample.png" width="264" height="61" alt=""></div>
         <div class="asset-meta">
           <h3>Credit tag</h3>
-          <p class="dims">525 × 122 PNG, a sample</p>
-          <p>How each streamer is credited on screen. The clip pipeline writes their channel into it for every clip.</p>
-          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/rift-daily-credit-pill-sample.png" data-name="rift-daily-credit-pill-sample.png">Save</button></div>
+          <p class="dims">528 × 122 PNG, a sample</p>
+          <p>How each streamer is credited on screen, at the right end of the same line. The clip pipeline writes their channel into it for every clip.</p>
+          <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-credit-pill-sample.png" data-name="blip-credit-pill-sample.png">Save</button></div>
         </div>
       </article>
     </div>
@@ -332,13 +365,13 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
     <h2 id="h-profiles">Profiles</h2>
     <p class="sub">What goes into each account. Set the contact email once and every text on this page picks it up.</p>
 
-    <div class="setonce cut">
+    <div class="setonce tile">
       <p class="label" style="margin:0">Set once · saved in this browser</p>
       <div class="setonce-grid">
         <div class="in"><label for="in-email">Contact email</label><input id="in-email" type="email" placeholder="the channel's own email" autocomplete="off" spellcheck="false"></div>
-        <div class="in"><label for="in-ig">Instagram handle</label><div class="prefixed"><span>@</span><input id="in-ig" type="text" value="riftdaily" autocomplete="off" spellcheck="false" autocapitalize="off"></div></div>
+        <div class="in"><label for="in-ig">Instagram handle</label><div class="prefixed"><span>@</span><input id="in-ig" type="text" value="bliplol" autocomplete="off" spellcheck="false" autocapitalize="off"></div></div>
       </div>
-      <p class="hint">Use the brand email, not a personal one: it shows in the channel description. Change the handle only if @riftdaily was taken on Instagram.</p>
+      <p class="hint">Use the brand email, not a personal one: it shows in the channel description. Change the handle only if @bliplol is taken on Instagram (it couldn't be checked from here).</p>
     </div>
 
     <div class="tabs" role="tablist" aria-label="Platform">
@@ -349,10 +382,10 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 
     <div class="panel" role="tabpanel" id="panel-yt" aria-labelledby="tab-yt">
       <dl class="facts">
-        <div class="fact cut"><dt class="label">Channel name</dt><dd><span class="val" id="yt-name">Rift Daily</span><button class="btn" type="button" data-copy-from="yt-name" aria-label="Copy the channel name">Copy</button></dd></div>
-        <div class="fact cut"><dt class="label">Handle</dt><dd><span class="val" id="yt-handle">@riftdaily</span><button class="btn" type="button" data-copy-from="yt-handle" aria-label="Copy the YouTube handle">Copy</button></dd></div>
+        <div class="fact tile"><dt class="label">Channel name</dt><dd><span class="val" id="yt-name">Blip</span><button class="btn" type="button" data-copy-from="yt-name" aria-label="Copy the channel name">Copy</button></dd></div>
+        <div class="fact tile"><dt class="label">Handle</dt><dd><span class="val" id="yt-handle">@bliplol</span><button class="btn" type="button" data-copy-from="yt-handle" aria-label="Copy the YouTube handle">Copy</button></dd></div>
       </dl>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">Channel description</span><span class="where">Customisation › Basic info › Description</span></div>
           <span class="count" data-limit="1000"></span>
@@ -360,7 +393,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
         </div>
         <div class="field-text" id="t-yt-desc" data-tpl="ytChannel"></div>
       </div>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">Keywords</span><span class="where">Settings › Channel › Basic info › Keywords</span></div>
           <span class="count" data-limit="500"></span>
@@ -368,7 +401,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
         </div>
         <div class="field-text" id="t-yt-kw" data-tpl="ytKeywords"></div>
       </div>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">Upload default description</span><span class="where">Settings › Upload defaults › Description</span></div>
           <button class="btn" type="button" data-copy-from="t-yt-default" aria-label="Copy the upload default description">Copy</button>
@@ -386,10 +419,10 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 
     <div class="panel" role="tabpanel" id="panel-tt" aria-labelledby="tab-tt" hidden>
       <dl class="facts">
-        <div class="fact cut"><dt class="label">Name</dt><dd><span class="val" id="tt-name">Rift Daily</span><button class="btn" type="button" data-copy-from="tt-name" aria-label="Copy the TikTok name">Copy</button></dd></div>
-        <div class="fact cut"><dt class="label">Username</dt><dd><span class="val" id="tt-user">riftdaily</span><button class="btn" type="button" data-copy-from="tt-user" aria-label="Copy the TikTok username">Copy</button></dd></div>
+        <div class="fact tile"><dt class="label">Name</dt><dd><span class="val" id="tt-name">Blip</span><button class="btn" type="button" data-copy-from="tt-name" aria-label="Copy the TikTok name">Copy</button></dd></div>
+        <div class="fact tile"><dt class="label">Username</dt><dd><span class="val" id="tt-user">bliplol</span><button class="btn" type="button" data-copy-from="tt-user" aria-label="Copy the TikTok username">Copy</button></dd></div>
       </dl>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">Bio</span><span class="where">Edit profile › Bio</span></div>
           <span class="count" data-limit="80"></span>
@@ -407,10 +440,10 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
 
     <div class="panel" role="tabpanel" id="panel-ig" aria-labelledby="tab-ig" hidden>
       <dl class="facts">
-        <div class="fact cut"><dt class="label">Name</dt><dd><span class="val" id="ig-name">Rift Daily</span><button class="btn" type="button" data-copy-from="ig-name" aria-label="Copy the Instagram name">Copy</button></dd></div>
-        <div class="fact cut"><dt class="label">Username</dt><dd><span class="val" id="ig-user">riftdaily</span><button class="btn" type="button" data-copy-from="ig-user" aria-label="Copy the Instagram username">Copy</button></dd></div>
+        <div class="fact tile"><dt class="label">Name</dt><dd><span class="val" id="ig-name">Blip</span><button class="btn" type="button" data-copy-from="ig-name" aria-label="Copy the Instagram name">Copy</button></dd></div>
+        <div class="fact tile"><dt class="label">Username</dt><dd><span class="val" id="ig-user">bliplol</span><button class="btn" type="button" data-copy-from="ig-user" aria-label="Copy the Instagram username">Copy</button></dd></div>
       </dl>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">Bio</span><span class="where">Edit profile › Bio</span></div>
           <span class="count" data-limit="150"></span>
@@ -430,7 +463,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
   <section id="every-video" aria-labelledby="h-video">
     <h2 id="h-video">Every video</h2>
     <p class="sub">Only two things change per clip: the title and whose clip it is. Type them in and copy the four texts. Once the clip pipeline runs, it writes these next to every render.</p>
-    <div class="compose cut">
+    <div class="compose tile">
       <div class="compose-grid">
         <div class="in">
           <label for="in-title">Title</label>
@@ -455,7 +488,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
       <p class="example" id="example-flag">Example values · type over them</p>
     </div>
     <div class="outputs">
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">YouTube title</span></div>
           <span class="count" data-limit="100"></span>
@@ -463,21 +496,21 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
         </div>
         <div class="field-text" id="o-yt-title" data-tpl="vTitle"></div>
       </div>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">YouTube description</span></div>
           <button class="btn" type="button" data-copy-from="o-yt-desc" aria-label="Copy the YouTube description">Copy</button>
         </div>
         <div class="field-text" id="o-yt-desc" data-tpl="vYouTube"></div>
       </div>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">TikTok caption</span></div>
           <button class="btn" type="button" data-copy-from="o-tt" aria-label="Copy the TikTok caption">Copy</button>
         </div>
         <div class="field-text" id="o-tt" data-tpl="vTikTok"></div>
       </div>
-      <div class="field cut">
+      <div class="field tile">
         <div class="field-head">
           <div class="field-name"><span class="label">Instagram caption</span></div>
           <button class="btn" type="button" data-copy-from="o-ig" aria-label="Copy the Instagram caption">Copy</button>
@@ -498,7 +531,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
       </fieldset>
       <fieldset class="group">
         <legend>YouTube</legend>
-        <label class="check" for="c-yt-channel"><input type="checkbox" id="c-yt-channel"><span><strong>Create the channel</strong>: Rift Daily, handle @riftdaily.<span class="where">youtube.com › your profile picture › Create a channel</span></span></label>
+        <label class="check" for="c-yt-channel"><input type="checkbox" id="c-yt-channel"><span><strong>Create the channel</strong>: Blip, handle @bliplol.<span class="where">youtube.com › your profile picture › Create a channel</span></span></label>
         <label class="check" for="c-yt-brand"><input type="checkbox" id="c-yt-brand"><span><strong>Profile picture, banner and watermark.</strong><span class="where">YouTube Studio › Customisation › Branding</span></span></label>
         <label class="check" for="c-yt-info"><input type="checkbox" id="c-yt-info"><span><strong>Description, links and contact email.</strong><span class="where">YouTube Studio › Customisation › Basic info</span></span></label>
         <label class="check" for="c-yt-kw"><input type="checkbox" id="c-yt-kw"><span><strong>Keywords</strong>, and the audience set to not made for kids.<span class="where">YouTube Studio › Settings › Channel</span></span></label>
@@ -507,12 +540,12 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
       </fieldset>
       <fieldset class="group">
         <legend>TikTok</legend>
-        <label class="check" for="c-tt-account"><input type="checkbox" id="c-tt-account"><span><strong>Sign up with the brand email</strong>: username riftdaily, the name, the bio, the photo.</span></label>
+        <label class="check" for="c-tt-account"><input type="checkbox" id="c-tt-account"><span><strong>Sign up with the brand email</strong>: username bliplol, the name, the bio, the photo.</span></label>
         <label class="check" for="c-tt-personal"><input type="checkbox" id="c-tt-personal"><span><strong>Leave it a personal account.</strong><span class="where">A business account loses most of the music library.</span></span></label>
       </fieldset>
       <fieldset class="group">
         <legend>Instagram</legend>
-        <label class="check" for="c-ig-account"><input type="checkbox" id="c-ig-account"><span><strong>Sign up with the brand email</strong>: username riftdaily, the name, the bio, the photo.</span></label>
+        <label class="check" for="c-ig-account"><input type="checkbox" id="c-ig-account"><span><strong>Sign up with the brand email</strong>: username <span class="ig-handle">bliplol</span>, the name, the bio, the photo.</span></label>
         <label class="check" for="c-ig-pro"><input type="checkbox" id="c-ig-pro"><span><strong>Switch to Professional › Creator</strong>, category Gaming video creator.<span class="where">Settings › Account type and tools</span></span></label>
       </fieldset>
       <fieldset class="group">
@@ -528,7 +561,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
     <h2 id="h-rules">Posting and credit</h2>
     <p class="sub">The few rules that keep the channel growing and the streamers happy.</p>
     <div class="two-col">
-      <div class="rules cut">
+      <div class="rules tile">
         <h3>Posting</h3>
         <ul>
           <li>Post at the same hour each time.</li>
@@ -536,7 +569,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
           <li>The same file on all three, uploaded natively. Never put a TikTok download, with its watermark, on Reels or Shorts.</li>
         </ul>
       </div>
-      <div class="rules cut">
+      <div class="rules tile">
         <h3>Credit and rights</h3>
         <ul>
           <li>Every clip credits its streamer on screen and in the text.</li>
@@ -549,30 +582,32 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
     </div>
   </section>
 
-  <footer class="foot">Rift Daily brand kit, first edition, 3 November 2026. The same texts live in <code>brand/BRAND.md</code>, and <code>brand/make_brand.py</code> draws every image.</footer>
+  <footer class="foot">Blip brand kit, 4 November 2026. The same texts live in <code>brand/BRAND.md</code>, and <code>brand/make_brand.py</code> draws every image.</footer>
 </div>
 
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-  const KEY = 'riftdaily-kit:';
+  const KEY = 'blip-kit:';
   const store = {
     get(k, d) { try { const v = localStorage.getItem(KEY + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) { /* storage off: the page still works */ } },
   };
+  // the contact email typed before the rename carries over
+  try { const old = localStorage.getItem('riftdaily-kit:email'); if (old && localStorage.getItem(KEY + 'email') === null) localStorage.setItem(KEY + 'email', old); } catch (e) { /* storage off */ }
 
-  const DISCLAIMER = "Rift Daily isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.";
-  const PER_VIDEO = "\n\n⚡ Subscribe to Rift Daily for the next one.\n\nAll clips belong to their creators. Streamers: want this one credited differently or taken down? Email {email} and it's handled within 24h. Not endorsed by Riot Games.\n\n#leagueoflegends #lol #shorts";
+  const DISCLAIMER = "Blip isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.";
+  const PER_VIDEO = "\n\n⚡ Subscribe to Blip for the next one.\n\nAll clips belong to their creators. Streamers: want this one credited differently or taken down? Email {email} and it's handled within 24h. Not endorsed by Riot Games.\n\n#leagueoflegends #lol #shorts";
   const TEXT = {
     ytChannel: "Outplays, pentakills, throws: the League of Legends moments you have to watch twice, picked from Twitch, Reddit and the community.\n\nSubscribe so you don't miss the next one.\n\nEvery clip belongs to its creator and is credited in the video and in its description. Streamers: if you'd like a clip credited differently or taken down, email {email} and it's done within 24 hours.\n\n" + DISCLAIMER,
-    ytKeywords: "league of legends, lol, league clips, lol clips, league of legends clips, lol highlights, league of legends highlights, league of legends funny moments, lol funny moments, outplays, pentakill, twitch clips, league shorts, lol shorts, rift daily",
+    ytKeywords: "league of legends, lol, league clips, lol clips, league of legends clips, lol highlights, league of legends highlights, league of legends funny moments, lol funny moments, outplays, pentakill, twitch clips, league shorts, lol shorts, blip, bliplol",
     ytDefault: "🎥 Clip: twitch.tv/{STREAMER} (go follow!)" + PER_VIDEO,
     ttBio: "League of Legends outplays, pentas & throws ⚡ Clips credited · DM for removal",
     igBio: "League of Legends outplays, pentas & throws ⚡\nStraight from Twitch, every clip credited\nDM for credit or removal",
     vTitle: "{title}",
     vYouTube: "🎥 Clip: {credit} (go follow!)" + PER_VIDEO,
-    vTikTok: "{title}\n\n🎥 {credit}\n#leagueoflegends #lol #leagueclips #gaming #riftdaily",
+    vTikTok: "{title}\n\n🎥 {credit}\n#leagueoflegends #lol #leagueclips #gaming #bliplol",
     vInstagram: "{title}\n\n🎥 {credit}\nFollow @{ig} for the next one ⚡\n#leagueoflegends #lol #leagueclips #gaming #esports",
   };
 
@@ -590,7 +625,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
   }
   function values() {
     const email = inEmail.value.trim();
-    const ig = inIg.value.trim().replace(/^@/, '') || 'riftdaily';
+    const ig = inIg.value.trim().replace(/^@/, '') || 'bliplol';
     const title = inTitle.value.trim();
     const credit = creditOf(inStreamer.value);
     return {
@@ -620,6 +655,8 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
   }
   function update() {
     const vals = values();
+    $('#ig-user').textContent = vals.ig.text;
+    $$('.ig-handle').forEach((el) => { el.textContent = vals.ig.text; });
     $$('[data-tpl]').forEach((el) => {
       fill(el, TEXT[el.dataset.tpl], vals);
       const c = el.closest('.field').querySelector('.count[data-limit]');

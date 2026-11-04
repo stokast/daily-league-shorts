@@ -1,9 +1,9 @@
-"""Render a Rift Daily short from a recipe (shorts/<date>-<slug>.json).
+"""Render a Blip short from a recipe (shorts/<date>-<slug>.json).
 
 The format, 1080 x 1920 at the stream's frame rate:
 - the streamer's cam on top (CAM_H px high), over a blurred copy of itself where it's narrower than the frame;
 - the play below: one fixed crop of the stream, zoomed to fill the rest. No cam: the play fills the frame;
-- on the seam: the Rift Daily tag on the left, the credit pill (CLIP twitch.tv/<streamer>) on the right;
+- on the seam: the Blip tag on the left, the credit pill (CLIP twitch.tv/<streamer>) on the right;
 - the hook: two lines at the top of the play for the first seconds;
 - captions: the streamer's words (Whisper word times), up to three at a time, the spoken word in gold, swears starred
   (the sound stays as recorded);
@@ -138,7 +138,7 @@ def scaled(ov: np.ndarray, s: float) -> np.ndarray:
 
 def stroked(lines: list[tuple[str, tuple]], font_path: Path, size: int, stroke: int, max_w: int = 1000,
             line_gap: float = 0.92) -> Image.Image:
-    """Lines of text, each in its colour, with a Rift Night stroke and a soft shadow; shrunk to fit `max_w`."""
+    """Lines of text, each in its colour, with a Night stroke and a soft shadow; shrunk to fit `max_w`."""
     while True:
         f = ImageFont.truetype(str(font_path), size)
         widths = [f.getlength(t) + 2 * stroke for t, _ in lines]
@@ -199,7 +199,7 @@ def chip(text: str, size: int = 40, fg=brand.NAVY, bg=brand.CYAN) -> Image.Image
 
 
 def seam_line() -> np.ndarray:
-    """A 4 px line along the seam, cyan into gold like the mark's two halves."""
+    """A 4 px line along the seam, cyan under the name into gold under the credit."""
     t = np.linspace(0, 1, W, dtype=np.float32)[None, :, None]
     cyan, gold = np.array(brand.CYAN[::-1], np.float32) / 255, np.array(brand.GOLD[::-1], np.float32) / 255
     col = cyan * (1 - t) + gold * t

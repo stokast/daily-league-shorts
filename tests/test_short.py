@@ -84,7 +84,7 @@ def test_post_texts_fill_the_title_and_the_streamer_and_keep_the_email_placehold
     assert t["YouTube title"] == "Peyz One-Shots Jax Through a Gromp 🤯"
     assert "🎥 Clip: twitch.tv/midbeast (go follow!)" in t["YouTube description"]
     assert "Email CONTACT_EMAIL" in t["YouTube description"]
-    assert t["TikTok caption"].startswith("Peyz One-Shots Jax") and "#riftdaily" in t["TikTok caption"]
+    assert t["TikTok caption"].startswith("Peyz One-Shots Jax") and "#bliplol" in t["TikTok caption"] and "@bliplol" in t["Instagram caption"]
     monkeypatch.setenv("RIFT_CONTACT_EMAIL", "clips@example.com")
     assert "Email clips@example.com" in post.texts("x", "twitch.tv/y")["YouTube description"]
 

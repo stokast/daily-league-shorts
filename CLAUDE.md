@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-Rift Daily: a League of Legends clips channel on YouTube Shorts, TikTok and Instagram Reels. One clip per short, its
-streamer credited on screen and in the text. The owner uploads every video by hand. This repo is separate from
+Blip (@bliplol): a League of Legends clips channel on YouTube Shorts, TikTok and Instagram Reels. One clip per short,
+its streamer credited on screen and in the text. The owner uploads every video by hand. This repo is separate from
 league-shorts (the edits for Draco's and Huncho's channels): nothing here reads from it or changes it, and those
 channels' notes don't apply here.
 

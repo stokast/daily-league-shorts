@@ -1,4 +1,4 @@
-"""Rift Daily's clip finder.
+"""Blip's clip finder.
 
   python -m rift top [--hours 24]          the most viewed League clips of the last N hours, saved to a run folder
                                            (work/runs/<UTC time>/clips.json), duplicates of one moment marked

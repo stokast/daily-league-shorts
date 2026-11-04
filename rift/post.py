@@ -7,12 +7,12 @@ from __future__ import annotations
 import os
 
 YOUTUBE = ("🎥 Clip: {credit} (go follow!)\n\n"
-           "⚡ Subscribe to Rift Daily for the next one.\n\n"
+           "⚡ Subscribe to Blip for the next one.\n\n"
            "All clips belong to their creators. Streamers: want this one credited differently or taken down? "
            "Email {email} and it's handled within 24h. Not endorsed by Riot Games.\n\n"
            "#leagueoflegends #lol #shorts")
-TIKTOK = "{title}\n\n🎥 {credit}\n#leagueoflegends #lol #leagueclips #gaming #riftdaily"
-INSTAGRAM = "{title}\n\n🎥 {credit}\nFollow @riftdaily for the next one ⚡\n#leagueoflegends #lol #leagueclips #gaming #esports"
+TIKTOK = "{title}\n\n🎥 {credit}\n#leagueoflegends #lol #leagueclips #gaming #bliplol"
+INSTAGRAM = "{title}\n\n🎥 {credit}\nFollow @bliplol for the next one ⚡\n#leagueoflegends #lol #leagueclips #gaming #esports"
 
 
 def texts(title: str, credit: str, email: str | None = None) -> dict:

@@ -1,4 +1,4 @@
-# Rift Daily
+# Blip
 
 The best League of Legends clips, one a day, as vertical shorts for YouTube Shorts, TikTok and Instagram Reels.
 
@@ -49,7 +49,7 @@ One JSON recipe per short, in `shorts/` with its word times (`<slug>.words.json`
 | `post` | the title; the descriptions and captions come from `brand/BRAND.md`'s templates (`rift/post.py`) |
 
 The format: 1080 x 1920; the cam on top (600 px, over a blurred copy where it's narrower), the play below; on the
-seam the Rift Daily tag and the credit pill; captions in the cam's lower part (up to three words, the spoken one in
+seam the Blip tag and the credit pill; captions in the cam's lower part (up to three words, the spoken one in
 gold, swears starred in the text only); an optional slowed replay with numbered steps in the lower third. Sound: one
 static gain to -14 LUFS and a limiter that takes at most 4 dB (a clip with clipped shouts ends a little quieter).
 
