@@ -19,6 +19,14 @@ The look and the name are being picked with the owner, round by round (2026-11-0
   summoner ring); and eight names that say League (`lnames`), each handle free on YouTube and TikTok that day: SoloQ
   Madness, League Madness, Challenger Plays, LoL Outplays HQ, SoloQ Chaos, Summoner Moments, League Insanity, LoL
   Highlights HQ.
+- "need better names + handles for the clipping tiktok, not some robotic bs" (2026-11-04): names from League's and
+  Twitch chat's own jokes instead of keywords. Free on TikTok and YouTube that day: It's Jungle's Fault
+  (@itsjunglesfault), I Was In Chat (@iwasinchat), Throw Merchant (@throwmerchant), Penta Stolen (@pentastolen), Queue
+  Pop (@queuepop), Rift Brainrot (@riftbrainrot), Inting Arc (@intingarc), Outplay Merchant (@outplaymerchant), Lowkey
+  Challenger (@lowkeychallenger); free on TikTok only: Question Ping (@questionping), Smite Steal (@smitesteal), Gank
+  Pls (@gankpls), Hardstuck Clips (@hardstuckclips). Taken on TikTok: Chat Clip That, Somebody Clip That, Who Clipped
+  This, Chat Is This Real, Report Jungle, FF at 15, Riot Pls, Enemy Missing, Flash on F, Jungle Diff, Free Elo, Mute
+  All, Rift Rats, Stuck in Silver, Bro Is Cooking.
 
 This file changes to the name and look picked.
 
