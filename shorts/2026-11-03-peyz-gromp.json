@@ -32,7 +32,7 @@
  "words": "shorts/2026-11-03-peyz-gromp.words.json",
  "replay": {
   "from": 4.3,
-  "to": 6.1,
+  "to": 6.45,
   "speed": 0.35,
   "game": [
    615,
@@ -40,27 +40,20 @@
    458,
    560
   ],
-  "impact_at": 5.3,
-  "steps": [
+  "impact_at": 5.65,
+  "riser_db": -12,
+  "sfx": [
    [
-    4.3,
-    "SPEARS STACK ON THE GROMP"
-   ],
-   [
-    4.85,
-    "Q THROUGH IT"
-   ],
-   [
-    5.2,
-    "THEY ALL JUMP TO JAX"
+    5.65,
+    "mc_death",
+    -6
    ]
-  ],
-  "riser_db": -12
+  ]
  },
  "post": {
   "title": "Peyz One-Shots Jax Through a Gromp 🤯"
  },
- "notes": "midbeast spectating T1 Peyz (Kalista). The spectator camera keeps Peyz in the middle, so one crop holds the play; the replay slows 4.3-6.1 s to 0.35x on a tighter crop. Both crops start at y 50, under the spectator's score bar, which cluttered the seam. The play is near silent on his stream (-40 to -46 dBFS against -7 to -13 for his shouting): lifted 16 dB until his first word, an impact on the spears bursting on Jax. The replay: a riser (the pack's riser_01) ending on the impact, the slowed game sound at -4 dB.",
+ "notes": "midbeast spectating T1 Peyz (Kalista). The spectator camera keeps Peyz in the middle, so one crop holds the play; the replay slows 4.3-6.1 s to 0.35x on a tighter crop. Both crops start at y 50, under the spectator's score bar, which cluttered the seam. The play is near silent on his stream (-40 to -46 dBFS against -7 to -13 for his shouting): lifted 16 dB until his first word, an impact on the spears bursting on Jax (his E, 5.65 s: the first frame with the burst and his bar empty). The replay: a riser (the pack's riser_01) ending on the impact, the slowed game sound at -4 dB. Owner, 2026-11-04: \"remove the step 1 2 3 text\", \"the sound dosent match the clip, it should end when he pops e and jax dies and thers ould be a like minecraft death sound, and leave clip 1 more sec before ending\": the impact and the riser's end had been at 5.3 s (0.35 s early, a full second in the slowed replay), now on the E at 5.65; the pack's Minecraft fall-damage hurt sound (mc_death) lands on that frame in the replay; the replay runs to 6.45 s, one more second at 0.35x; no steps.",
  "gains": [
   [
    1.0,
@@ -70,7 +63,7 @@
  ],
  "sfx": [
   [
-   5.3,
+   5.65,
    "impact",
    -12
   ]

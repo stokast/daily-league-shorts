@@ -45,7 +45,7 @@ One JSON recipe per short, in `shorts/` with its word times (`<slug>.words.json`
 | `hook`, `hook_until` | two lines over the play for the first seconds |
 | `words` | the word times for the captions |
 | `gains`, `pre_limit_db`, `sfx` | `[from, to, dB]` stretches (quiet game up, clipped shouts down), a fast limiter on the lifted game's hits, `[time, sound, dB]` sounds on the play |
-| `replay` | `from`, `to`, `speed`, a tighter `game` crop, `steps` `[[time, text]]`, `impact_at`, `riser_db` |
+| `replay` | `from`, `to`, `speed`, a tighter `game` crop, `steps` `[[time, text]]`, `impact_at`, `riser_db`, `sfx` `[[time, sound, dB]]` at source times |
 | `post` | the title; the descriptions and captions come from `brand/BRAND.md`'s templates (`rift/post.py`) |
 
 The format: 1080 x 1920; the cam on top (600 px, over a blurred copy where it's narrower), the play below; on the
@@ -55,8 +55,9 @@ the name lands with one ping, the line draws itself to the credit, the credit sl
 at the start of every short, smooth, eye candy, not overbearing, clean"). The hook, the captions and the replay's
 steps are in Montserrat Black / ExtraBold ("a more default font for shorts", replacing Chakra Petch); captions in
 the cam's lower part (up to three words, the spoken one in gold, swears starred in the text only); an optional
-slowed replay with numbered steps in the lower third. Sound: one static gain to -14 LUFS and a limiter that takes at
+slowed replay (the impact on the kill's frame, a riser ending on it, no step text). Sound: one static gain to -14 LUFS and a limiter that takes at
 most 4 dB (a clip with clipped shouts ends a little quieter).
 
 Sounds live in `assets/sfx/` (never committed), copied from the editor's UR.FASTEDITOR pack: `whoosh.ogg` = "336
-SFX/MIX/Swoosh 2.wav", `impact.ogg` = "336 SFX/HITS/Hit.wav", `riser.ogg` = "336 SFX/MIX/QUICK RISER (7).wav".
+SFX/MIX/Swoosh 2.wav", `impact.ogg` = "336 SFX/HITS/Hit.wav", `riser.ogg` = "336 SFX/MIX/QUICK RISER (7).wav", `mc_death.ogg` = "230 mixed sound effcts/Minecraft Fall Damage
+(Crack) - Sound Effect (HD) (320 kbps).mp3" from 0.49 s (its silent start cut, so the hurt sound lands on the cue).

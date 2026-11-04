@@ -47,8 +47,10 @@ skipped as "too small to read on a phone" (2026-11-03).
 - Sound: measure the clip every 0.5 s before mixing. Streams often carry the game 20-40 dB under the voice: lift the
   game between the lines (`gains`), bring clipped shouts down, shave the lifted game's hits (`pre_limit_db`), then
   check the render's loudness second by second.
-- A mechanics play gets the replay: slowed to about 0.35x on a tighter crop, numbered steps in the lower third, a
-  whoosh in and a riser ending on the impact.
+- A mechanics play gets the replay: slowed to about 0.35x on a tighter crop, a whoosh in and a riser ending on the
+  impact, no step text (the owner had the numbered steps taken out, 2026-11-04). Put the impact on the frame the kill
+  lands, found frame by frame: the Peyz impact first sat 0.35 s early, a full second in the slowed replay ("the sound
+  dosent match the clip"). Let the replay run about 2 s past the kill before the short ends.
 - Before sending: a sheet of the hook, the captions, the play and the replay; the length, size (under 30 MiB) and
   loudness from the render line.
 

@@ -465,6 +465,26 @@ def loudness(path: Path) -> tuple[float, float]:
     return i, tp
 
 
+def sound_cues(r: dict, tl: dict) -> list[tuple[str, float, float]]:
+    """Every sound effect as (name, output seconds, dB): the clip's own `sfx` (source times inside the trim), then the
+    replay's whoosh in, its impact with the riser ending on it, and its own `sfx` (source times, slowed with it)."""
+    t0 = r["trim"][0]
+    cues = [(name, at - t0, db) for at, name, db in r.get("sfx", []) if t0 <= at < r["trim"][1]]
+    rep = r.get("replay")
+    if rep:
+        sp = rep["speed"]
+        cues.append(("whoosh", tl["main_s"] - 0.12, rep.get("whoosh_db", -8)))
+        if rep.get("impact_at") is not None:
+            hit = tl["main_s"] + (rep["impact_at"] - rep["from"]) / sp
+            cues.append(("impact", hit, rep.get("impact_db", -10)))
+            if rep.get("riser_db") is not None:  # a riser that ends on the impact, for the slowed build-up
+                cues.append(("riser", hit - sound_length(SOUNDS / "riser.ogg"), rep["riser_db"]))
+        for at, name, db in rep.get("sfx", []):
+            if rep["from"] <= at < rep["to"]:
+                cues.append((name, tl["main_s"] + (at - rep["from"]) / sp, db))
+    return cues
+
+
 def sound(r: dict, out: Path, fps: float) -> dict:
     src = ROOT / r["source"]
     tl = timeline(r, fps)
@@ -481,7 +501,6 @@ def sound(r: dict, out: Path, fps: float) -> dict:
     graph = [f"[0:a]atrim=start={t0:.4f}:duration={tl['main_s']:.4f},asetpts=PTS-STARTPTS,aresample=48000,"
              f"aformat=channel_layouts=stereo[main]"]
     mix = ["[main]"]
-    cues = [(name, at - t0, db) for at, name, db in r.get("sfx", []) if t0 <= at < r["trim"][1]]
     rep = r.get("replay")
     if rep:
         sp = rep["speed"]
@@ -491,12 +510,7 @@ def sound(r: dict, out: Path, fps: float) -> dict:
                      f"atrim=duration={tl['rep_s']:.4f}[rep]")
         graph.append("[m0][rep]concat=n=2:v=0:a=1[st]")
         mix = ["[st]"]
-        cues.append(("whoosh", tl["main_s"] - 0.12, rep.get("whoosh_db", -8)))
-        if rep.get("impact_at") is not None:
-            hit = tl["main_s"] + (rep["impact_at"] - rep["from"]) / sp
-            cues.append(("impact", hit, rep.get("impact_db", -10)))
-            if rep.get("riser_db") is not None:  # a riser that ends on the impact, for the slowed build-up
-                cues.append(("riser", hit - sound_length(SOUNDS / "riser.ogg"), rep["riser_db"]))
+    cues = sound_cues(r, tl)
     for k, (name, at, db) in enumerate(cues, start=1):
         inputs += ["-i", str(SOUNDS / f"{name}.ogg")]
         ms = max(0, int(at * 1000))

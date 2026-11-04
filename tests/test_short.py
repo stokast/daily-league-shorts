@@ -114,3 +114,19 @@ def test_the_seam_line_stops_short_of_the_name_and_the_credit_and_draws_itself_i
         line.draw(frame, t)
         seam.append(int(frame[line.y:line.y + 4, mid].max()))
     assert seam[0] == 0 and seam[1] > 100                            # not there at the start, there after the intro
+
+
+def test_replay_sounds_land_on_their_source_moment_slowed_and_the_riser_ends_on_the_impact(monkeypatch):
+    monkeypatch.setattr(short, "sound_length", lambda path: 2.29)
+    r = {"trim": [1.2, 11.05], "sfx": [[5.65, "impact", -12], [12.0, "impact", -12]],
+         "replay": {"from": 4.3, "to": 6.45, "speed": 0.35, "impact_at": 5.65, "riser_db": -12,
+                    "sfx": [[5.65, "mc_death", -6], [7.0, "mc_death", -6]]}}
+    tl = short.timeline(r, 60.0)
+    cues = {name: [] for name in ("impact", "riser", "whoosh", "mc_death")}
+    for name, at, db in short.sound_cues(r, tl):
+        cues[name].append(round(at, 3))
+    hit = round(tl["main_s"] + (5.65 - 4.3) / 0.35, 3)
+    assert cues["impact"] == [round(5.65 - 1.2, 3), hit]                 # the clip's own (12.0 is past the trim)
+    assert cues["mc_death"] == [hit]                                     # 7.0 is past the replay
+    assert cues["riser"] == [round(hit - 2.29, 3)]                       # ends on the impact
+    assert cues["whoosh"] == [round(tl["main_s"] - 0.12, 3)]
