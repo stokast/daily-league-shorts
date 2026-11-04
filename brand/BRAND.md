@@ -35,6 +35,11 @@ The look and the name are being picked with the owner, round by round (2026-11-0
   spelled Orvanne), Veyra (@veyralol: a pending US trademark of The Celestial Group's). Free but Google turns them into
   a near twin: Teyra (the tayra, an animal), Ezryn (ezrin, a protein). Contested: Vantra (Hankook tyres, a camper-van
   maker), Corvin (Corvin Castle).
+- "more" (2026-11-04): 32 more coined words; free with "lol" on TikTok and YouTube, nothing ranking for the word itself:
+  Talyx (@talyxlol), Veynor (@veynorlol), Arveon (@arveonlol), Strevo (@strevolol), Kelvir (@kelvirlol), Torvan
+  (@torvanlol), Venrix (@venrixlol), Solvyn (@solvynlol). Out: Vaxon (a biotech company), Lyrion (a music server), Kovex
+  (small Czech firms), Nirox (Google turns it into NIOX, a pharma company); taken on TikTok even with "lol": Kyrel,
+  Nyxen, Saelo, Ryvex.
 
 This file changes to the name and look picked.
 
