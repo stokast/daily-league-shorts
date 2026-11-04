@@ -26,9 +26,9 @@ source is `brand/kit.html`).
 | Mist | `#A0B2D2` | secondary text on navy |
 | White | `#F4F7FF` | the name, text |
 
-**Type** (all SIL Open Font License, in `brand/fonts/`): Urbanist Black for the name and CLIP; Chakra Petch Bold
-Italic for the hook and the replay's steps, Chakra Petch Bold for labels (REPLAY); Inter ExtraBold / SemiBold for the
-captions and the credit.
+**Type** (all SIL Open Font License, in `brand/fonts/`): Urbanist Black for the name and CLIP; Montserrat Black for
+the hook and the replay's steps, Montserrat ExtraBold for the captions and labels (REPLAY): the usual shorts font;
+Inter ExtraBold for the channel on the credit tag.
 
 **The logo**: "blip" in lowercase Urbanist Black, white, its i dotted with a cyan ping, two rings spreading from it
 the way a ping lands on the minimap. The ping alone is the mark, for small square spots. Drawn by
@@ -47,6 +47,11 @@ the way a ping lands on the minimap. The ping alone is the mark, for small squar
 | `blip-wordmark-dark.png` | the name for light backgrounds (navy letters, a deeper cyan ping) |
 | `blip-corner-bug.png` | the name on every short, left on the seam (the pipeline adds it) |
 | `blip-credit-pill-sample.png` | how the streamer is credited on screen, right on the seam (the pipeline writes their channel in it) |
+
+**On every short**: the name on the left of the seam (the line between the cam and the play), the credit on the
+right, and a line from one to the other in Ping into Gold that never runs under either. Each short opens with them
+coming in, all within the first second: the name lands with one ping spreading from its dot, the line draws itself
+to the credit with a soft light at its tip, the credit slides in (`rift/short.py`, `INTRO`).
 
 ## Profiles
 
@@ -201,3 +206,7 @@ Round by round with the owner, from 2026-11-03 (each look round's boards come fr
   the minimap, so the logo is "blip" in lowercase Urbanist Black with a cyan ping for the i's dot; the night navy,
   the cyan and the gold accent carry over from the League look. Drawn by `make_brand.py`; the shorts' tag and credit
   change with it.
+- "make it so on shorts, under the blip logo, theres no blue line so its eaier to read it, als oadd an animation for
+  that bar at the start of every short, smooth, eye candy, not overbearing, clean etc. this fnot sucks, a more default
+  font for shorts" (2026-11-04): the seam's line stops short of the name and the credit; every short opens with the
+  entrance above; the hook, captions and replay steps moved from Chakra Petch to Montserrat Black / ExtraBold.

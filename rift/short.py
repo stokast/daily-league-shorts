@@ -3,8 +3,10 @@
 The format, 1080 x 1920 at the stream's frame rate:
 - the streamer's cam on top (CAM_H px high), over a blurred copy of itself where it's narrower than the frame;
 - the play below: one fixed crop of the stream, zoomed to fill the rest. No cam: the play fills the frame;
-- on the seam: the Blip tag on the left, the credit pill (CLIP twitch.tv/<streamer>) on the right;
-- the hook: two lines at the top of the play for the first seconds;
+- on the seam: the Blip tag on the left, the credit pill (CLIP twitch.tv/<streamer>) on the right, a line between
+  them that never runs under either; every short opens with them coming in (INTRO): the name lands with one ping,
+  the line draws itself to the credit, the credit slides in, all within the first second;
+- the hook: two lines at the top of the play for the first seconds; all the short's own text in Montserrat;
 - captions: the streamer's words (Whisper word times), up to three at a time, the spoken word in gold, swears starred
   (the sound stays as recorded);
 - an optional replay after the clip: the play again, slowed and zoomed tighter, with numbered steps, a whoosh in
@@ -33,9 +35,10 @@ W, H = 1080, 1920
 CAM_H = 600
 STEPS_Y = 1390  # replay steps: the lower third, clear of the play's top and of the apps' bottom bars
 SEAM = CAM_H
-FONT_HOOK = ROOT / "brand/fonts/ChakraPetch-BoldItalic.ttf"
-FONT_LABEL = ROOT / "brand/fonts/ChakraPetch-Bold.ttf"
-FONT_CAPTION = ROOT / "brand/fonts/Inter-ExtraBold.ttf"
+FONT_HOOK = ROOT / "brand/fonts/Montserrat-Black.ttf"         # the shorts' own type: Montserrat, the usual one
+FONT_LABEL = ROOT / "brand/fonts/Montserrat-ExtraBold.ttf"
+FONT_CAPTION = ROOT / "brand/fonts/Montserrat-ExtraBold.ttf"
+INTRO = {"tag": 0.0, "ping": 0.12, "line": 0.22, "line_s": 0.7, "pill": 0.6}  # the brand's entrance, in seconds
 SOUNDS = ROOT / "assets/sfx"  # local copies from the editor's pack (never committed); see README
 TARGET_LUFS, CEILING_DBTP = -14.0, -1.0
 MAX_LIMIT_DB = 4.0  # the limiter takes at most this much off the peaks; a clip with clipped shouts ends quieter
@@ -198,38 +201,105 @@ def chip(text: str, size: int = 40, fg=brand.NAVY, bg=brand.CYAN) -> Image.Image
     return brand.shadowed(im, 6, 0.6, 2)
 
 
-def seam_line() -> np.ndarray:
-    """A 4 px line along the seam, cyan under the name into gold under the credit."""
-    t = np.linspace(0, 1, W, dtype=np.float32)[None, :, None]
+def seam_line(n: int, h: int = 4) -> np.ndarray:
+    """The line on the seam, n px long between the name and the credit: cyan at the name into gold at the credit,
+    its ends rounded."""
+    t = np.linspace(0, 1, n, dtype=np.float32)[None, :, None]
     cyan, gold = np.array(brand.CYAN[::-1], np.float32) / 255, np.array(brand.GOLD[::-1], np.float32) / 255
     col = cyan * (1 - t) + gold * t
-    ov = np.ones((4, W, 4), np.float32)
-    ov[..., :3] = np.repeat(col, 4, axis=0)
+    a = np.ones((h, n), np.float32)
+    r = h / 2
+    yy = np.arange(h, dtype=np.float32)[:, None] + 0.5 - r
+    for xs in (np.arange(0, int(r) + 1), n - 1 - np.arange(0, int(r) + 1)):  # the round caps
+        for x in xs:
+            dx = (r - 0.5 - min(x, n - 1 - x))
+            a[:, x] = np.clip(r - np.sqrt(np.maximum(0, dx) ** 2 + yy[:, 0] ** 2) + 0.5, 0, 1)
+    ov = np.empty((h, n, 4), np.float32)
+    ov[..., :3] = np.repeat(col, h, axis=0) * a[..., None]
+    ov[..., 3] = a
     return ov
+
+
+def ease_out(k: float, p: float = 3.0) -> float:
+    return 1 - (1 - min(1.0, max(0.0, k))) ** p
+
+
+class SeamLine:
+    """The seam's line drawing itself from the name to the credit (ease-out), a soft light running at its tip, then
+    still for the rest of the short."""
+
+    def __init__(self, x0: int, x1: int, y: int, t0: float, dur: float, h: int = 4):
+        self.img, self.x0, self.y, self.t0, self.dur = seam_line(x1 - x0, h), x0, y, t0, dur
+        self.x, self.t1 = x0, 1e9  # like a Layer: where it is and when it shows
+        gw, gh = 72, 26  # the tip's light: a soft white-cyan glow
+        yy, xx = np.mgrid[0:gh, 0:gw].astype(np.float32)
+        g = np.exp(-(((xx - gw / 2) / (gw / 5)) ** 2 + ((yy - gh / 2) / (gh / 5)) ** 2))
+        col = (np.array([1.0, 1.0, 1.0], np.float32) * 0.6 + np.array(brand.CYAN[::-1], np.float32) / 255 * 0.4)
+        self.glow = np.empty((gh, gw, 4), np.float32)
+        self.glow[..., :3] = col * g[..., None]
+        self.glow[..., 3] = g
+
+    def draw(self, frame: np.ndarray, t: float) -> None:
+        if t < self.t0:
+            return
+        k = (t - self.t0) / self.dur
+        w = self.img.shape[1] if k >= 1 else int(round(ease_out(k) * self.img.shape[1]))
+        if w > 0:
+            blend(frame, self.img[:, :w], self.x0, self.y)
+        if k < 1:
+            gh, gw = self.glow.shape[:2]
+            blend(frame, self.glow, self.x0 + w - gw // 2, self.y + self.img.shape[0] // 2 - gh // 2,
+                  0.85 * (1 - k) ** 0.7)
+
+
+class PingRing:
+    """One ring spreading out of the logo's ping as the name lands, the way a ping lands on the minimap."""
+
+    def __init__(self, cx: float, cy: float, r: float, t0: float, dur: float = 0.8, reach: float = 6.0):
+        self.cx, self.cy, self.r, self.t0, self.dur, self.reach = cx, cy, r, t0, dur, reach
+        self.x, self.y, self.t1 = cx, cy, t0 + dur  # like a Layer: where it is and when it shows
+
+    def draw(self, frame: np.ndarray, t: float) -> None:
+        k = (t - self.t0) / self.dur
+        if not 0 <= k < 1:
+            return
+        rr = self.r * (1.3 + (self.reach - 1.3) * ease_out(k, 2.2))
+        width = max(1.5, self.r * 0.42 * (1 - 0.5 * k))
+        n = int(2 * (rr + width) + 6)
+        patch = np.zeros((n, n), np.uint8)
+        c = n / 2
+        cv2.circle(patch, (int(c * 16), int(c * 16)), int(rr * 16), 255, max(1, int(round(width))), cv2.LINE_AA,
+                   shift=4)
+        a = patch.astype(np.float32) / 255
+        ov = np.empty((n, n, 4), np.float32)
+        ov[..., :3] = (np.array(brand.CYAN[::-1], np.float32) / 255) * a[..., None]
+        ov[..., 3] = a
+        blend(frame, ov, int(round(self.cx - c)), int(round(self.cy - c)), 0.9 * (1 - k) ** 1.4)
 
 
 class Layer:
     """An overlay shown from t0 to t1 (output seconds), popping in over `pop` s and fading out over `fade` s."""
 
     def __init__(self, img: np.ndarray, x, y, t0: float, t1: float, pop: float = 0.0, fade: float = 0.0,
-                 grow: float = 0.12, anchor: str = "tl"):
+                 grow: float = 0.12, anchor: str = "tl", slide: tuple = (0, 0)):
         self.img, self.x, self.y, self.t0, self.t1 = img, x, y, t0, t1
-        self.pop, self.fade, self.grow, self.anchor = pop, fade, grow, anchor
+        self.pop, self.fade, self.grow, self.anchor, self.slide = pop, fade, grow, anchor, slide
 
     def draw(self, frame: np.ndarray, t: float) -> None:
         if not (self.t0 <= t < self.t1):
             return
-        a, s = 1.0, 1.0
+        a, s, dx, dy = 1.0, 1.0, 0.0, 0.0
         if self.pop and t - self.t0 < self.pop:
             k = (t - self.t0) / self.pop
             a = min(1.0, k * 1.6)
             s = 1 + self.grow * (1 - k) ** 2
+            dx, dy = (v * (1 - ease_out(k)) for v in self.slide)
         if self.fade and self.t1 - t < self.fade:
             a *= max(0.0, (self.t1 - t) / self.fade)
         img = scaled(self.img, s)
         h, w = img.shape[:2]
-        x = int(round(self.x - (w / 2 if "c" in self.anchor else w if "r" in self.anchor else 0)))
-        y = int(round(self.y - (h / 2 if "m" in self.anchor else 0)))
+        x = int(round(self.x + dx - (w / 2 if "c" in self.anchor else w if "r" in self.anchor else 0)))
+        y = int(round(self.y + dy - (h / 2 if "m" in self.anchor else 0)))
         blend(frame, img, x, y, a)
 
 
@@ -301,12 +371,24 @@ def timeline(r: dict, fps: float) -> dict:
 def layers(r: dict, tl: dict) -> list[Layer]:
     has_cam = r["cam"] is not None
     top = SEAM if has_cam else 0
-    out = [Layer(seam_line(), 0, SEAM - 2, 0, 1e9)] if has_cam else []
-    tag = rgba(brand.corner_bug(62))
+    out = []
+    tag_im, tag_at = brand.corner_bug(62, info=True)
+    tag = rgba(tag_im)
     pill = rgba(brand.credit_pill(r["clip"]["credit"], 0.92))
     seam_y = SEAM if has_cam else 300
-    out.append(Layer(tag, 26, seam_y, 0, 1e9, anchor="tm"))
-    out.append(Layer(pill, W - 26 - pill.shape[1], seam_y, 0, 1e9, anchor="tm"))
+    tag_x, pill_x = 26, W - 26 - pill.shape[1]
+    tag_top = seam_y - tag.shape[0] / 2
+    # the brand's entrance: the name lands with one ping, the line draws from it to the credit, the credit slides in.
+    # The line stops short of both, so it never runs through the letters.
+    if has_cam:
+        body = np.nonzero(pill[..., 3].max(axis=0) > 0.75)[0]   # the pill itself, not its shadow
+        x0 = int(tag_x + tag_at["letters"][2] + 14)
+        x1 = int(pill_x + body[0] - 14)
+        out.append(SeamLine(x0, x1, SEAM - 2, INTRO["line"], INTRO["line_s"]))
+    out.append(Layer(tag, tag_x, seam_y, INTRO["tag"], 1e9, anchor="tm", pop=0.3, grow=-0.08))
+    cx, cy, pr = tag_at["ping"]
+    out.append(PingRing(tag_x + cx, tag_top + cy, pr, INTRO["ping"]))
+    out.append(Layer(pill, pill_x, seam_y, INTRO["pill"], 1e9, anchor="tm", pop=0.32, grow=0, slide=(28, 0)))
     if r.get("hook"):
         cols = [brand.WHITE, brand.CYAN]
         hook = stroked([(t, cols[i % 2]) for i, t in enumerate(r["hook"])], FONT_HOOK, 96, 8, max_w=1000)

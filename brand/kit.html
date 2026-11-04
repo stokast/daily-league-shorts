@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700;800;900&family=Chakra+Petch:ital,wght@1,700&family=Inter:wght@400;500;600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700;800;900&family=Montserrat:wght@800;900&family=Inter:wght@400;500;600;800&display=swap">
 <style>
 /* Layout: a one-column field kit on the brand's own Night, opened by the banner's safe band. Tiles are rounded like
    the credit tag, the buttons are pills, and a small ping (a dot in two rings) marks each list item. */
@@ -25,7 +25,7 @@
   --paper: #F4F7FF;
   --paper-rule: #D3DCEC;
   --display: "Urbanist", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --hook: "Chakra Petch", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --hook: "Montserrat", "Arial Black", "Segoe UI", system-ui, sans-serif;
   --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
   --r: 14px;
@@ -89,7 +89,7 @@ p { text-wrap: pretty; }
 .types { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
 .type { background: var(--deck); padding: 16px; display: grid; gap: 10px; align-content: space-between; min-width: 0; }
 .type-a { font: 900 40px/1 var(--display); letter-spacing: 0.02em; color: var(--gold); }
-.type-b { font: italic 700 22px/1.1 var(--hook); color: var(--cyan); }
+.type-b { font: 900 22px/1.1 var(--hook); color: var(--cyan); }
 .type-c { font: 800 21px/1.1 var(--body); overflow-wrap: anywhere; }
 .voice { max-width: 62ch; margin: 0; font-size: 16px; }
 
@@ -248,8 +248,8 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
     <p class="subhead">Type</p>
     <div class="types">
       <div class="type tile"><p class="type-a" style="margin:0">CLIP</p><p class="hint">Urbanist Black · the name and CLIP</p></div>
-      <div class="type tile"><p class="type-b" style="margin:0">THROUGH A GROMP</p><p class="hint">Chakra Petch Bold Italic · the hook on each short</p></div>
-      <div class="type tile"><p class="type-c" style="margin:0">twitch.tv/streamer</p><p class="hint">Inter ExtraBold · captions and the credit</p></div>
+      <div class="type tile"><p class="type-b" style="margin:0">THROUGH A GROMP</p><p class="hint">Montserrat Black and ExtraBold · the hook, captions and replay steps on each short</p></div>
+      <div class="type tile"><p class="type-c" style="margin:0">twitch.tv/streamer</p><p class="hint">Inter ExtraBold · the channel on the credit tag</p></div>
     </div>
     <p class="hint" style="margin-top:10px">All three are free under the SIL Open Font License; the files are in <code>brand/fonts/</code>.</p>
 
@@ -345,7 +345,7 @@ input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2
         <div class="asset-meta">
           <h3>Corner tag</h3>
           <p class="dims">148 × 113 PNG</p>
-          <p>The name on every short, at the left end of the line between the cam and the play, so the brand shows on Shorts too. The clip pipeline adds it.</p>
+          <p>The name on every short, at the left end of the line between the cam and the play, so the brand shows on Shorts too. Each short opens with it landing with one ping, the line drawing itself to the credit, and the credit sliding in. The clip pipeline adds all of it.</p>
           <div class="save-row"><button class="btn save-btn" type="button" data-save="out/blip-corner-bug.png" data-name="blip-corner-bug.png">Save</button></div>
         </div>
       </article>

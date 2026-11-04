@@ -94,3 +94,23 @@ def test_post_texts_carry_no_tagline():
     for v in post.texts("x", "twitch.tv/y").values():
         low = v.lower()
         assert "every day" not in low and "best clip" not in low and "tomorrow" not in low
+
+
+def test_the_seam_line_stops_short_of_the_name_and_the_credit_and_draws_itself_in_at_the_start():
+    from brand import make_brand as brand
+    import numpy as np
+    r = {"cam": [0, 0, 300, 300], "clip": {"credit": "twitch.tv/someone"}, "trim": [0.0, 5.0]}
+    lays = short.layers(r, {"main_s": 5.0, "rep_s": 0.0})
+    line = next(lay for lay in lays if isinstance(lay, short.SeamLine))
+    _, tag_at = brand.corner_bug(62, info=True)
+    assert line.x0 > 26 + tag_at["letters"][2]                       # nothing under the letters
+    pill = next(lay for lay in lays if isinstance(lay, short.Layer) and lay.slide != (0, 0))
+    body = np.nonzero(pill.img[..., 3].max(axis=0) > 0.75)[0]
+    assert line.x0 + line.img.shape[1] < pill.x + body[0]            # nor under the credit
+    mid = line.x0 + line.img.shape[1] // 2
+    seam = []
+    for t in (0.0, 2.0):
+        frame = np.zeros((short.H, short.W, 3), np.uint8)
+        line.draw(frame, t)
+        seam.append(int(frame[line.y:line.y + 4, mid].max()))
+    assert seam[0] == 0 and seam[1] > 100                            # not there at the start, there after the intro

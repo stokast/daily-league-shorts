@@ -233,12 +233,20 @@ def watermark(size: int = 150, kind: str = "name") -> Image.Image:
 
 # -- on the short ---------------------------------------------------------------------------------------------------
 
-def corner_bug(height: int = 72) -> Image.Image:
+def corner_bug(height: int = 72, info: bool = False):
     """The brand on every short (it sits on the seam, left): the name, white, its ping cyan, shadowed to read on any
-    frame. `height` is the name's full height, rings included."""
+    frame. `height` is the name's full height, rings included. With `info`, also where its parts landed in the image:
+    "ping" (cx, cy, r) and "letters" (their ink box)."""
     probe = wordmark(100)
-    wm = wordmark(max(8, round(100 * height / probe.height)))
-    return shadowed(wm, max(3, height * 0.09), 0.8, max(1, height // 30))
+    wm, parts = logo(max(8, round(100 * height / probe.height)))
+    r, dy = max(3, height * 0.09), max(1, height // 30)
+    im = shadowed(wm, r, 0.8, dy)
+    if not info:
+        return im
+    pad = int(r * 3) + abs(dy)
+    cx, cy, pr = parts["ping"]
+    l, t, rr, b = parts["letters"]
+    return im, {"ping": (cx + pad, cy + pad, pr), "letters": (l + pad, t + pad, rr + pad, b + pad)}
 
 
 def credit_pill(handle: str = "twitch.tv/streamer", scale: float = 1.0) -> Image.Image:

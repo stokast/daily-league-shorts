@@ -49,9 +49,14 @@ One JSON recipe per short, in `shorts/` with its word times (`<slug>.words.json`
 | `post` | the title; the descriptions and captions come from `brand/BRAND.md`'s templates (`rift/post.py`) |
 
 The format: 1080 x 1920; the cam on top (600 px, over a blurred copy where it's narrower), the play below; on the
-seam the Blip tag and the credit pill; captions in the cam's lower part (up to three words, the spoken one in
-gold, swears starred in the text only); an optional slowed replay with numbered steps in the lower third. Sound: one
-static gain to -14 LUFS and a limiter that takes at most 4 dB (a clip with clipped shouts ends a little quieter).
+seam the Blip tag and the credit pill with a line between them, never under the name (the owner, 2026-11-04: "under
+the blip logo, theres no blue line so its eaier to read it"); every short opens with them coming in, under a second:
+the name lands with one ping, the line draws itself to the credit, the credit slides in ("an animation for that bar
+at the start of every short, smooth, eye candy, not overbearing, clean"). The hook, the captions and the replay's
+steps are in Montserrat Black / ExtraBold ("a more default font for shorts", replacing Chakra Petch); captions in
+the cam's lower part (up to three words, the spoken one in gold, swears starred in the text only); an optional
+slowed replay with numbered steps in the lower third. Sound: one static gain to -14 LUFS and a limiter that takes at
+most 4 dB (a clip with clipped shouts ends a little quieter).
 
 Sounds live in `assets/sfx/` (never committed), copied from the editor's UR.FASTEDITOR pack: `whoosh.ogg` = "336
 SFX/MIX/Swoosh 2.wav", `impact.ogg` = "336 SFX/HITS/Hit.wav", `riser.ogg` = "336 SFX/MIX/QUICK RISER (7).wav".
