@@ -25,7 +25,9 @@ Walk the ranking, most viewed first, one clip per moment, and take each clip unl
   wrong. Pure gameplay can come from any stream;
 - nothing League happens and the talk isn't about League (an eviction story told in queue);
 - it's too short to follow (about 8 s or less): look for another viewer's longer clip of the same moment;
-- the check says `music` or `song`: look and listen first, and a song on stream is a skip;
+- the check says `music` or `song`: look and listen first, and a song on stream is a skip. Score it every 3 s
+  (`check.audio_tags(wave, window=3.0)`): a song stays steady (0.5+ in every window), a fight's sounds and the
+  multikill announcer spike and fall back to about 0.0 (2026-11-04: four of five picks were flagged that way);
 - it has a slur, abuse read out, or a title saying a slur was heard (the check's `unpostable` list is a start, not
   the whole read);
 - it's another streamer's stream shown inside this one, or an official esports broadcast (Riot claims those).
