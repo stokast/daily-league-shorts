@@ -27,6 +27,14 @@ The look and the name are being picked with the owner, round by round (2026-11-0
   Pls (@gankpls), Hardstuck Clips (@hardstuckclips). Taken on TikTok: Chat Clip That, Somebody Clip That, Who Clipped
   This, Chat Is This Real, Report Jungle, FF at 15, Riot Pls, Enemy Missing, Flash on F, Jungle Diff, Free Elo, Mute
   All, Rift Rats, Stuck in Silver, Bro Is Cooking.
+- "stop thinknig of corny word plays with two worsd, just clean branding, easy to google, eg "Synapse" posts laegue
+  shorts for years, sometihg like that, with no contest for seo" (2026-11-04): one coined word, the handle the word +
+  "lol" (all 30 bare 4-6 letter coined words tried were taken on TikTok, and 16 of 18 longer ones). Free on TikTok and
+  YouTube that day, nothing else ranking for the word on the web: Vireon (@vireonlol: only the vireo birds come up),
+  Ravik (@raviklol: nothing exact), Vaelis (@vaelislol: fantasy wiki pages only), Orvane (@orvanelol: a French river
+  spelled Orvanne), Veyra (@veyralol: a pending US trademark of The Celestial Group's). Free but Google turns them into
+  a near twin: Teyra (the tayra, an animal), Ezryn (ezrin, a protein). Contested: Vantra (Hankook tyres, a camper-van
+  maker), Corvin (Corvin Castle).
 
 This file changes to the name and look picked.
 
