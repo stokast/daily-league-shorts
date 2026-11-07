@@ -32,15 +32,17 @@ export const OPEN = {
   text: openText,
   keys: openKeys,
   blink: [[0, 0.42]], // cursor on-intervals before typing starts (it stays on while typing)
-  enter: 2.62,
+  enter: openKeys[openKeys.length - 1] + 0.32,
 };
 
 // ---- Act 2: sucked into the cable ---------------------------------------------------------------
+const IN_SUCK_END = OPEN.enter + 0.86;
+const IN_DIVE_END = IN_SUCK_END + 0.46;
 export const IN = {
-  suck: [OPEN.enter, OPEN.enter + 0.36], // letters swirl into the centre point
-  approach: [OPEN.enter + 0.3, 3.42], // the cable end grows out of the point; we dive in
-  tunnel: [3.42, 4.62], // inside the cable, accelerating
-  flash: 4.62, // white-out at the end of the cable = the drop
+  suck: [OPEN.enter, IN_SUCK_END], // the words are pulled backwards into a spiral, into a point
+  approach: [IN_SUCK_END - 0.1, IN_DIVE_END], // the cable end grows out of the point; we dive in
+  tunnel: [IN_DIVE_END, IN_DIVE_END + 1.2], // inside the cable, accelerating
+  flash: IN_DIVE_END + 1.2, // white-out at the end of the cable = the drop
 };
 
 // ---- Act 3: the game world ----------------------------------------------------------------------

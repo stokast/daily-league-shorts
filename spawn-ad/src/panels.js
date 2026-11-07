@@ -5,7 +5,6 @@ import * as THREE from 'three';
 import { PROMPTS, MONTAGE, SPAWNS, OUT, CLIMAX } from './timeline.js';
 import { clamp, lerp, smoothstep, invLerp, easeOutCubic, easeInOutCubic, easeInCubic, easeOutBack, rng, hash } from './util.js';
 
-const FOLLOW_Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(THREE.MathUtils.degToRad(8.5), 0, 0, 'YXZ'));
 const TAN_V = Math.tan(THREE.MathUtils.degToRad(31)); // half vertical fov (62 deg)
 
 // Where things go, in frame-normalised coords (sx, sy in -1..1 of the frame at that depth) and depth d.
@@ -239,7 +238,8 @@ export class Panels {
 
   update(t, post) {
     const cam = this.world.camera;
-    const { pos: camPos } = this.world.camPose(t);
+    // screens live in the frame of the walk (no head bob), so the bob moves them like the rest of the world
+    const { pos: camPos, quat: followQ } = this.world.basePose(t);
     const streaks = [];
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pp = new THREE.Vector3();
     const vortex = easeInCubic(invLerp(OUT.vortex[0], OUT.vortex[1], t));
@@ -252,7 +252,7 @@ export class Panels {
       const lead = s.kind === 'montage' ? 0.07 : s.impact - s.enter;
       if (lt >= -lead && lt < 0.02) {
         const pl = this.place(p, s.impact);
-        const wp = camPos.clone().add(pl.pos.clone().applyQuaternion(FOLLOW_Q));
+        const wp = camPos.clone().add(pl.pos.clone().applyQuaternion(followQ));
         const scr = wp.clone().project(cam);
         streaks.push({ x1: (scr.x * 0.5 + 0.5) * this.W, y1: (0.5 - scr.y * 0.5) * this.H, u: clamp((lt + lead) / lead), kind: s.kind });
       }
@@ -275,7 +275,7 @@ export class Panels {
         local.y = target.y + x * Math.sin(ang) + y * Math.cos(ang);
         w *= 1 - 0.85 * vortex;
       }
-      const world = camPos.clone().add(local.applyQuaternion(FOLLOW_Q));
+      const world = camPos.clone().add(local.applyQuaternion(followQ));
       p.group.visible = true;
       p.group.position.copy(world);
       // face the camera, with a little personality

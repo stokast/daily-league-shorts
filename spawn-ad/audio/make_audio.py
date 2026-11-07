@@ -633,6 +633,36 @@ for e in ev:
         tk = filt(noise(tick_n), 'band', [2500, 6000]) * np.exp(-np.arange(tick_n) / SR / 0.004)
         fx.add(tk, e['t'], -26.0, 0.1)
 
+# ------------------------------------------------------------------------- the walk
+def footstep(seed):
+    rr = np.random.default_rng(seed)
+    n = int(0.22 * SR)
+    t = np.arange(n) / SR
+    thud = np.sin(2 * np.pi * (70 + 50 * np.exp(-t / 0.015)) * t) * np.exp(-t / 0.045)
+    grit = np.repeat(rr.standard_normal(n // 6 + 1), 6)[:n]
+    crunch = filt(rr.standard_normal(n) * 0.6 + grit * 0.6, 'band', [1200, 5200]) * (np.exp(-t / 0.05) * (0.6 + 0.4 * rr.random(n) ** 3))
+    return thud * 0.7 + crunch * 0.55
+
+
+step_k = 1
+while True:
+    st = W0 + step_k * BEAT - 0.012
+    if st >= vortex0 - 0.1:
+        break
+    fx.add(footstep(500 + step_k), st, -21.0 + (1.0 if step_k % 2 else 0.0), -0.18 if step_k % 2 else 0.18)
+    step_k += 1
+
+# dusk crickets, very low, across the walk
+cr_n = int((vortex0 - W0) * SR)
+ct = np.arange(cr_n) / SR
+crick = np.zeros(cr_n)
+for f0, rate, ph in [(4650, 7.0, 0.0), (5120, 5.3, 1.7), (4380, 6.1, 3.1)]:
+    gate = (np.sin(2 * np.pi * 34 * ct + ph) > 0.2).astype(float) * (np.sin(2 * np.pi * rate / 4 * ct + ph) > 0.3)
+    gate = filt(gate, 'low', 300)
+    crick += np.sin(2 * np.pi * f0 * ct) * gate * 0.33
+crick *= np.minimum(1, ct / 1.0) * np.clip((cr_n / SR - ct) / 0.6, 0, 1)
+fx.add(pan2(crick, 0.3) * 0.6 + pan2(crick[::-1].copy(), -0.4) * 0.4, W0, -36.0)
+
 # ----------------------------------------------------------------------------- the way out
 CL = TL['climax']['enter']
 fx.add(whoosh(flash_out - CL, 200, 6000, 0.7, 'rise'), CL, -10.0)

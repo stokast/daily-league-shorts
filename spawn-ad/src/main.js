@@ -71,15 +71,10 @@ function setTime(t) {
   }
 
   // ---- transitions
-  // opening: the typed line swirls into a point
-  const suck = invLerp(TL.IN.suck[0], TL.IN.suck[1], t);
-  if (t >= TL.IN.suck[0] && t < TL.IN.approach[1]) {
-    post.ovSwirl = 0.9 * easeInCubic(suck);
-    post.ovShrink = easeInCubic(suck);
-  }
+  // opening: the overlay pulls the words back into a spiral itself (no 2D warp)
   // the point: grows as the text collapses, hands over to the cable end as we dive in
   post.point = Math.max(post.point,
-    smoothstep(TL.IN.suck[0] + 0.1, TL.IN.suck[1], t) * (1 - smoothstep(TL.IN.approach[0] + 0.12, TL.IN.approach[0] + 0.42, t)));
+    smoothstep(TL.IN.suck[0] + 0.3, TL.IN.suck[1], t) * (1 - smoothstep(TL.IN.approach[0] + 0.14, TL.IN.approach[0] + 0.44, t)));
   // into the world: white burst
   if (t >= TL.IN.flash - 0.16 && t < TL.IN.flash + 0.6) {
     post.flash = t < TL.IN.flash ? easeInExpo(invLerp(TL.IN.flash - 0.16, TL.IN.flash, t)) : Math.pow(1 - invLerp(TL.IN.flash, TL.IN.flash + 0.5, t), 2.2);
