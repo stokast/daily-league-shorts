@@ -7,7 +7,7 @@ import path from 'node:path';
 import { serve, BROWSER_ARGS } from './server.mjs';
 const { chromium } = createRequire(import.meta.url)('playwright');
 
-const [, , timesArg, outDir = 'scratch/stills', scaleArg = '0.5', sheet, colsArg = '4'] = process.argv;
+const [, , timesArg, outDir = 'scratch/stills', scaleArg = '0.5', sheet, colsArg = '4', extraQuery = ''] = process.argv;
 const scale = +scaleArg;
 const W = Math.round(1080 * scale / 2) * 2, H = Math.round(1920 * scale / 2) * 2;
 const times = timesArg.split(',').map(Number);
@@ -28,7 +28,7 @@ const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('console:', m.text()); });
 page.on('pageerror', (e) => console.log('pageerror:', e.message));
 const base = `http://127.0.0.1:${server.address().port}`;
-await page.goto(`${base}/index.html?w=${W}&h=${H}`);
+await page.goto(`${base}/index.html?w=${W}&h=${H}${extraQuery ? '&' + extraQuery : ''}`);
 await page.waitForFunction('window.ready===true', null, { timeout: 120000 });
 const t0 = Date.now();
 for (let i = 0; i < times.length; i++) {

@@ -15,6 +15,8 @@ import { clamp, smoothstep, invLerp, easeInCubic, easeOutCubic, easeInExpo } fro
 
 const q = new URLSearchParams(location.search);
 const W = +(q.get('w') || 1080), H = +(q.get('h') || 1920);
+// ?only=world renders the world alone (no title screens, no overlay) for look development
+const ONLY_WORLD = q.get('only') === 'world';
 
 await loadFonts();
 
@@ -22,6 +24,9 @@ const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuff
 renderer.setPixelRatio(1);
 renderer.setSize(W, H, false);
 renderer.toneMapping = THREE.NoToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = true;
 document.body.appendChild(renderer.domElement);
 
 const rt = new THREE.WebGLRenderTarget(W, H, { type: THREE.UnsignedByteType, colorSpace: THREE.SRGBColorSpace, samples: 4 });
@@ -63,7 +68,7 @@ function setTime(t) {
     scene = tunnel.scene; camera = tunnel.camera;
   } else if (t >= TL.IN.flash && t < TL.OUT.flash) {
     world.update(t, post);
-    panels.update(t, post);
+    if (!ONLY_WORLD) panels.update(t, post);
     scene = world.scene; camera = world.camera;
   } else if (t >= TL.OUT.flash && t < TL.OUT.recede[1]) {
     tunnel.update(t, post);
@@ -101,7 +106,7 @@ function setTime(t) {
   bloom.radius = post.bloomRadius;
   bloom.threshold = post.bloomThreshold;
 
-  if (overlay.draw(t)) overlay.texture.needsUpdate = true;
+  if (!ONLY_WORLD && overlay.draw(t)) overlay.texture.needsUpdate = true;
 
   U.uTime.value = t;
   U.uRadial.value = post.radial;

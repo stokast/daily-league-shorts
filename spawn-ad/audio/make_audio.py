@@ -535,8 +535,8 @@ key_seed = 100
 for e in ev:
     if e['type'] == 'key':
         tag = e['tag']
-        kind = 'space' if e['ch'] == ' ' else ('light' if tag == 'fast' else 'key')
-        lvl = {'open': -10.0, 'end': -10.0, 'world': -14.0, 'fast': -18.0}[tag]
+        kind = 'space' if e['ch'] == ' ' else ('light' if tag in ('fast', 'montage') else 'key')
+        lvl = {'open': -10.0, 'end': -10.0, 'world': -14.0, 'fast': -18.0, 'montage': -25.0}[tag]
         keys.add(key_click(kind, 1.0, key_seed), e['t'] - 0.004, lvl)
         key_seed += 1
     elif e['type'] == 'enter':
@@ -659,13 +659,7 @@ def footstep(seed):
     return thud * 0.7 + crunch * 0.55
 
 
-step_k = 1
-while True:
-    st = W0 + step_k * BEAT - 0.012
-    if st >= vortex0 - 0.1:
-        break
-    fx.add(footstep(500 + step_k), st, -21.0 + (1.0 if step_k % 2 else 0.0), -0.18 if step_k % 2 else 0.18)
-    step_k += 1
+# (no footsteps: the walk is a smooth glide)
 
 # dusk crickets, very low, across the walk
 cr_n = int((vortex0 - W0) * SR)

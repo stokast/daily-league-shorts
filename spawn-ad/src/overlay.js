@@ -64,7 +64,7 @@ export class Overlay {
     const { ctx, W, H } = this;
     ctx.clearRect(0, 0, W, H);
     if (t < IN.handoff) this.drawOpening(t);
-    if (t >= WORLD.barIn - 0.05 && t < OUT.flash + 0.05) this.drawBar(t);
+    if (t >= WORLD.start && t < OUT.flash + 0.05) this.drawStreaks();
     if (t >= END.cursorAt - 0.02) this.drawEnd(t);
     return true;
   }
@@ -75,7 +75,7 @@ export class Overlay {
       const n = count(OPEN.keys, t);
       return `o|${n}|${this.openCursorOn(t)}|${t < OPEN.keys[0] ? 0 : Math.round(t * 60)}|${t > OPEN.enter ? Math.round(t * 60) : 0}`;
     }
-    if (t >= WORLD.barIn - 0.05 && t < OUT.flash + 0.05) return `b|${Math.round(t * 120)}`; // animated: redraw
+    if (t >= WORLD.start && t < OUT.flash + 0.05) return this.streaks.length ? `s|${Math.round(t * 120)}` : 'blank'; // only the streaks now
     if (t >= END.cursorAt - 0.02) return `e|${Math.round(t * 120)}`;
     return 'blank';
   }
@@ -254,7 +254,7 @@ export class Overlay {
   drawStreaks() {
     const { ctx, s } = this;
     for (const st of this.streaks) {
-      const x0 = this.barAnchor.x, y0 = this.barAnchor.y;
+      const x0 = st.x0 ?? this.barAnchor.x, y0 = st.y0 ?? this.barAnchor.y;
       const e = easeInCubic(st.u);
       const hx = lerp(x0, st.x1, e), hy = lerp(y0, st.y1, e);
       const tail = Math.max(0, e - 0.45);

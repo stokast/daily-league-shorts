@@ -61,7 +61,8 @@ export const W0 = IN.flash; // music downbeat
 export const beat = (k) => W0 + k * BEAT;
 export const WORLD = { start: W0, barIn: beat(1.5) };
 
-// Hero/mid prompts: typed in full into the chat bar; the screen lands on the `impact` beat.
+// Hero/mid prompts: each is a prompt card floating in the air that types itself; its game's screen
+// lands above it on the `impact` beat. The card appears `cardIn` (a moment before the first key).
 const PROMPTS_DEF = [
   { screen: 'fighter', text: 'i want to make a fighting game', k: 5, mean: 0.042 },
   { screen: 'shooter', text: 'i want to make a military shooter', k: 9, mean: 0.040 },
@@ -74,12 +75,18 @@ export const PROMPTS = PROMPTS_DEF.map((p, i) => {
   const impact = beat(p.k);
   const enter = impact - (p.mean > 0.03 ? 0.12 : 0.10);
   const keys = typedTo(p.text, enter - (p.mean > 0.03 ? 0.2 : 0.1), p.mean, 101 + i);
-  return { ...p, index: i, kind: i < 3 ? 'hero' : 'mid', impact, enter, keys };
+  return { ...p, index: i, kind: i < 3 ? 'hero' : 'mid', impact, enter, keys, cardIn: keys[0] - 0.12 };
 });
 
-// Montage: the bar reads "i want to make a ___ game"; the blank flips to a new word and that game spawns.
+// Montage: a burst of prompts typed fast all over the sky ("i want to make a ___ game"), several at
+// once, each landing its game. Words match each screen's meta.word.
 export const MONTAGE_PREFIX = 'i want to make a ';
 export const MONTAGE_SUFFIX = ' game';
+const MONTAGE_WORDS = {
+  farm: 'cozy farming', pirate: 'pirate', kart: 'kart racing', ninja: 'ninja', monster: 'monster taming', dungeon: 'dungeon',
+  dodgeball: 'dodgeball', hero: 'superhero', rhythm: 'rhythm', tower: 'tower defense', mech: 'mech', golf: 'mini golf',
+  cooking: 'cooking', western: 'western', dino: 'dinosaur', deepsea: 'deep sea',
+};
 const MONTAGE_IDS = [
   'farm', 'pirate', 'kart', // quarter notes
   'ninja', 'monster', 'dungeon', 'dodgeball', 'hero', 'rhythm', 'tower', 'mech', 'golf', 'cooking', 'western', 'dino', 'deepsea', // eighths
@@ -87,16 +94,23 @@ const MONTAGE_IDS = [
 export const MONTAGE = MONTAGE_IDS.map((screen, i) => {
   const k = i < 3 ? 23 + i : 26 + (i - 3) * 0.5;
   const impact = beat(k);
-  return { screen, index: i, kind: 'montage', impact, swap: impact - 0.07 };
+  const word = MONTAGE_WORDS[screen];
+  const text = MONTAGE_PREFIX + word + MONTAGE_SUFFIX;
+  const enter = impact - 0.08;
+  const typeDur = i < 3 ? 0.55 : 0.42;
+  const keys = typedTo(text, enter - 0.05, typeDur / text.length, 700 + i);
+  return { screen, index: i, kind: 'montage', impact, swap: impact - 0.07, word, text, keys, enter, cardIn: keys[0] - 0.18 };
 });
 export const MONTAGE_START = beat(22.2); // template appears (after the zombie prompt is sent)
 
 // Climax: "i want to make anything" then everything is pulled back into the cable.
 const climaxText = 'i want to make anything';
+const climaxKeys = typedFrom(climaxText, beat(32.3), 0.028, 404);
 export const CLIMAX = {
   text: climaxText,
-  keys: typedFrom(climaxText, beat(32.3), 0.028, 404),
+  keys: climaxKeys,
   enter: beat(34.4),
+  cardIn: climaxKeys[0] - 0.3,
 };
 export const OUT = {
   vortex: [CLIMAX.enter + 0.02, beat(36)], // screens and world swirl into the centre
@@ -137,7 +151,7 @@ export function events() {
     ev.push({ t: p.impact, type: 'spawn', screen: p.screen, kind: p.kind });
   }
   for (const m of MONTAGE) {
-    ev.push({ t: m.swap, type: 'swap', screen: m.screen });
+    keys(m.text, m.keys, 'montage');
     ev.push({ t: m.impact, type: 'spawn', screen: m.screen, kind: 'montage', index: m.index });
   }
   keys(CLIMAX.text, CLIMAX.keys, 'fast');

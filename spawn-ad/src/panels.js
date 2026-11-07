@@ -1,8 +1,11 @@
-// The title screens floating in the world: each spawns with a streak from the chat bar and a pixel
-// dissolve, heroes take centre stage then move aside, the montage fills the sky, and at the end
-// everything is pulled into the vortex.
+// The prompts and title screens floating in the air. Each game starts as a prompt card (Spawn's input
+// bar, floating in the world) that types itself; on enter its screen spawns above it with a pixel
+// dissolve, and the prompt stays under it as a caption. Heroes take centre stage then move aside; the
+// montage fills the sky with prompts typing several at once; at the end everything is pulled into the
+// vortex.
 import * as THREE from 'three';
 import { PROMPTS, MONTAGE, SPAWNS, OUT, CLIMAX } from './timeline.js';
+import { PromptCard } from './promptcard.js';
 import { clamp, lerp, smoothstep, invLerp, easeOutCubic, easeInOutCubic, easeInCubic, easeOutBack, rng, hash } from './util.js';
 
 const TAN_V = Math.tan(THREE.MathUtils.degToRad(31)); // half vertical fov (62 deg)
@@ -146,6 +149,14 @@ class Panel {
     this.halo.position.z = -0.02;
     this.halo.renderOrder = 0;
     this.group.add(this.halo, this.bezel, this.screen);
+    // the prompt that makes this game, floating under where the screen appears
+    this.card = new PromptCard(spawn.text, spawn.keys, spawn.enter, this.kind === 'montage' ? 'small' : 'big');
+    const cardW = 0.86;
+    this.card.base = cardW;
+    this.cardBelow = -(0.5 / this.aspect) - 0.05 - (cardW * this.card.aspectInv) / 2;
+    this.cardAbove = -this.cardBelow;
+    this.card.mesh.position.set(0, this.cardBelow, 0.01);
+    this.group.add(this.card.mesh);
     this.group.visible = false;
     const r = rng(1000 + index * 7);
     this.jit = { yaw: (r() - 0.5) * 0.28, roll: (r() - 0.5) * 0.1, pitch: (r() - 0.5) * 0.12, ph: r() * 10 };
@@ -201,6 +212,9 @@ export class Panels {
     }
     this.burst.frustumCulled = false;
     this.world.scene.add(this.burst);
+    // the last prompt: "i want to make anything", front and centre
+    this.climax = new PromptCard(CLIMAX.text, CLIMAX.keys, CLIMAX.enter, 'big', 'anything');
+    this.world.scene.add(this.climax.mesh);
   }
 
   /** Local (camera-follow) placement of a panel at time t: { pos, width, look } or null. */
@@ -213,14 +227,14 @@ export class Panels {
       const slot = MONTAGE_SLOTS[s.index % MONTAGE_SLOTS.length];
       // every later spawn pushes this one back and outward
       let push = 0;
-      for (const m of MONTAGE) if (m.index > s.index) push += easeOutCubic(invLerp(m.impact - 0.05, m.impact + 0.3, t));
+      for (const m of MONTAGE) if (m.index > s.index) push += easeOutCubic(invLerp(m.cardIn, m.cardIn + 0.3, t));
       const out = 1 + push * 0.07;
       pos = localFromSlot({ sx: slot.sx * out, sy: 0.4 + (slot.sy - 0.4) * out, d: MONTAGE_D + push * MONTAGE_PUSH }, a);
       w = MONTAGE_W;
     } else {
       // centre stage until the next prompt is sent, then move to its side slot
       const next = PROMPTS[s.index + 1];
-      const asideAt = next ? next.enter : MONTAGE[0].swap - 0.1;
+      const asideAt = next ? next.enter : MONTAGE[0].cardIn - 0.1;
       const aside = localFromSlot(ASIDE[s.screen], a);
       const u = easeInOutCubic(invLerp(asideAt, asideAt + 0.6, t));
       onStage = 1 - u;
@@ -232,7 +246,7 @@ export class Panels {
       w = lerp(STAGE.w, ASIDE[s.screen].w, u);
     }
     // everything slowly comes towards you (you're moving forward)
-    pos.z += Math.max(0, t - s.impact) * 0.09;
+    pos.z += Math.max(0, t - s.cardIn) * 0.09;
     return { pos, w, onStage };
   }
 
@@ -245,23 +259,12 @@ export class Panels {
     const vortex = easeInCubic(invLerp(OUT.vortex[0], OUT.vortex[1], t));
     const climaxPulse = Math.exp(-Math.max(0, t - CLIMAX.enter) * 6) * (t >= CLIMAX.enter ? 1 : 0);
 
+    const toScreen = (v) => { const sp = v.clone().project(cam); return { x: (sp.x * 0.5 + 0.5) * this.W, y: (0.5 - sp.y * 0.5) * this.H }; };
     this.panels.forEach((p, i) => {
       const s = p.spawn;
       const lt = t - s.impact;
-      // streak from the chat bar into the world, just before the impact
-      const lead = s.kind === 'montage' ? 0.07 : s.impact - s.enter;
-      if (lt >= -lead && lt < 0.02) {
-        const pl = this.place(p, s.impact);
-        const wp = camPos.clone().add(pl.pos.clone().applyQuaternion(followQ));
-        const scr = wp.clone().project(cam);
-        streaks.push({ x1: (scr.x * 0.5 + 0.5) * this.W, y1: (0.5 - scr.y * 0.5) * this.H, u: clamp((lt + lead) / lead), kind: s.kind });
-      }
-      if (lt < 0) {
-        p.group.visible = false;
-        m4.makeScale(0, 0, 0);
-        for (let k = 0; k < this.BURST; k++) this.burst.setMatrixAt(i * this.BURST + k, m4);
-        return;
-      }
+      const zeroBurst = () => { m4.makeScale(0, 0, 0); for (let k = 0; k < this.BURST; k++) this.burst.setMatrixAt(i * this.BURST + k, m4); };
+      if (t < s.cardIn) { p.group.visible = false; zeroBurst(); return; }
       const pl = this.place(p, t);
       let local = pl.pos.clone();
       let w = pl.w;
@@ -285,8 +288,32 @@ export class Panels {
       p.group.rotateY(p.jit.yaw * jitK + idle * 0.03);
       p.group.rotateX(p.jit.pitch * jitK + Math.sin(t * 0.7 + p.jit.ph) * 0.02);
       p.group.rotateZ(p.jit.roll * jitK + vortex * 1.5);
-      const pop = lerp(0.9, 1, easeOutBack(clamp(lt / 0.35), 2.5));
+      const pop = lt < 0 ? 1 : lerp(0.94, 1, easeOutBack(clamp(lt / 0.35), 2.5));
       p.group.scale.setScalar(w * pop);
+
+      // the prompt card: types, sends, then stays as the screen's caption; for the heroes it floats up
+      // above its screen when the next prompt appears below
+      if (s.kind !== 'montage') {
+        const next = PROMPTS[s.index + 1];
+        const flipAt = next ? next.cardIn : MONTAGE[0].cardIn;
+        const f = easeInOutCubic(invLerp(flipAt, flipAt + 0.45, t));
+        p.card.mesh.position.set(0, lerp(p.cardBelow, p.cardAbove, f), 0.01 + Math.sin(f * Math.PI) * 0.08);
+      }
+      p.card.update(t, s.cardIn, climaxPulse);
+      // streak from the card up into the screen, between enter and impact
+      if (t >= s.enter && lt < 0.02) {
+        const from = toScreen(p.card.mesh.getWorldPosition(new THREE.Vector3()));
+        const to = toScreen(p.group.position);
+        streaks.push({ x0: from.x, y0: from.y, x1: to.x, y1: to.y, u: clamp((t - s.enter) / Math.max(0.05, s.impact - s.enter)), kind: s.kind });
+      }
+      if (lt < 0) {
+        // card only: the screen hasn't spawned yet
+        p.uni.uReveal.value = 0;
+        p.bezU.uA.value = 0;
+        p.haloU.uA.value = 0;
+        zeroBurst();
+        return;
+      }
 
       // reveal + flash
       const reveal = clamp(lt / 0.34);
@@ -322,6 +349,20 @@ export class Panels {
       }
     });
     this.burst.instanceMatrix.needsUpdate = true;
+
+    // the climax card, then into the vortex
+    const cm = this.climax.mesh;
+    cm.visible = t >= CLIMAX.cardIn && t < OUT.flash;
+    if (cm.visible) {
+      this.climax.base = 2.9 * (1 - 0.85 * vortex);
+      this.climax.update(t, CLIMAX.cardIn, 0);
+      const local = new THREE.Vector3(0, 0.12 * TAN_V * 6.0, -6.0);
+      local.z += (t - CLIMAX.cardIn) * 0.12;
+      if (vortex > 0) local.lerp(new THREE.Vector3(0, 0.25 * TAN_V * 10, -10), vortex);
+      cm.position.copy(camPos.clone().add(local.applyQuaternion(followQ)));
+      cm.lookAt(cam.position);
+      cm.rotateZ(vortex * 1.5);
+    }
     this.overlay.streaks = streaks;
   }
 }
