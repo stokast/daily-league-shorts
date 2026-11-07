@@ -8,14 +8,14 @@ footage, samples or stock music. Separate from the rest of this repo.
 | time | what happens |
 |---|---|
 | 0.0 | black screen, Spawn's pixel font, a blinking block cursor; `i want to make a game` is typed |
-| 2.6 | enter: the line swirls into a point of light, which is the end of a cable; we dive in |
-| 3.4 | through the cable: twisted glowing strands, data packets streaking past, light at the end |
-| 4.6 | white burst into a dusk game world: you spawn on a pad, a shockwave reveals the level grid |
-| 5.6 | prompts typed into a Spawn-style chat bar; each spawns its game's title/loading screen (pixel dissolve), on the beat |
-| 16.1 | montage: `i want to make a ___ game` flips through 16 genres, the sky fills with games |
-| 20.8 | `i want to make anything`, enter: the world drains into a vortex |
-| 22.6 | back out through the same cable, backwards; the cable end shrinks into the cursor |
-| 25.2 | `create with SpawnAI`; the cursor turns into Spawn's sparkle; the logo + spawn.co |
+| 2.5 | enter: the words are pulled backwards into the screen along a spiral, into a point of light: the end of a cable; we dive in |
+| 3.8 | through the cable: twisted glowing strands, data packets streaking past, light at the end |
+| 5.0 | white burst into a dusk MMO-style village: walking a grassy trail between lit cottages, looking up at the sky |
+| 6.0 | prompts typed into a Spawn-style chat bar; each spawns its game's title/loading screen in the sky (pixel dissolve), on the beat |
+| 16.4 | montage: `i want to make a ___ game` flips through 16 genres, the sky fills with games |
+| 21.1 | `i want to make anything`, enter: the world drains into a vortex |
+| 23.0 | back out through the same cable, backwards; the cable end shrinks into the cursor |
+| 25.5 | `create with SpawnAI`; the cursor turns into Spawn's sparkle; the logo + spawn.co |
 
 Every game shown is made up (names, logos, characters); they evoke genres (fighting, military shooter, space
 social deduction, racing, horror...) without copying any real game. Spawn's own brand comes from its site:
@@ -39,6 +39,6 @@ Chromium and Playwright must be installed (the render uses SwiftShader, so no GP
 - `src/main.js`: renderer, post chain (bloom + `src/post.js`: vortex/pinch, radial blur, aberration, flash,
   grain, dither, overlay composite) and `window.ad` used by the render scripts.
 - `src/overlay.js`: everything typed (opening, chat bar, montage reel, streaks, end card).
-- `src/tunnel.js`, `src/world.js`, `src/panels.js`: the cable, the game world, the floating title screens.
+- `src/tunnel.js`, `src/world.js`, `src/panels.js`: the cable, the village walk, the floating title screens.
 - `src/screens/*.js`: one module per made-up game (`BRIEF.md` has the rules), drawn with Canvas2D.
 - `render/`: static server, stills, and the video renderer (parallel jobs, then one x264 encode + audio).
