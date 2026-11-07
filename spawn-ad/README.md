@@ -8,14 +8,14 @@ footage, samples or stock music. Separate from the rest of this repo.
 | time | what happens |
 |---|---|
 | 0.0 | black screen, Spawn's pixel font, a blinking block cursor; `i want to make a game` is typed |
-| 2.5 | enter: the words are pulled backwards into the screen along a spiral, into a point of light: the end of a cable; we dive in |
-| 3.8 | through the cable: twisted glowing strands, data packets streaking past, light at the end |
-| 5.0 | white burst into a dusk MMO-style village: walking a grassy trail between lit cottages, looking up at the sky |
-| 6.0 | prompts typed into a Spawn-style chat bar; each spawns its game's title/loading screen in the sky (pixel dissolve), on the beat |
-| 16.4 | montage: `i want to make a ___ game` flips through 16 genres, the sky fills with games |
-| 21.1 | `i want to make anything`, enter: the world drains into a vortex |
-| 23.0 | back out through the same cable, backwards; the cable end shrinks into the cursor |
-| 25.5 | `create with SpawnAI`; the cursor turns into Spawn's sparkle; the logo + spawn.co |
+| 2.5 | enter: a cable's glowing mouth opens behind the words and sucks them in (air rushing in, letters stretched and swallowed); we dive in after them |
+| 3.7 | through the cable, overtaking our own words: twisted glowing strands, data packets streaking past, light at the end |
+| 4.9 | white burst into a dusk MMO-style village: walking a grassy trail between lit cottages, looking up at the sky |
+| 5.9 | prompts typed into a Spawn-style chat bar; each spawns its game's title/loading screen in the sky (pixel dissolve), on the beat |
+| 16.3 | montage: `i want to make a ___ game` flips through 16 genres, the sky fills with games |
+| 21.0 | `i want to make anything`, enter: the world drains into a vortex |
+| 22.9 | back out through the same cable, backwards; the cable end shrinks into the cursor |
+| 25.4 | `create with SpawnAI`; the cursor turns into Spawn's sparkle; the logo + spawn.co |
 
 Every game shown is made up (names, logos, characters); they evoke genres (fighting, military shooter, space
 social deduction, racing, horror...) without copying any real game. Spawn's own brand comes from its site:

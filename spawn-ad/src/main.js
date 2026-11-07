@@ -48,7 +48,7 @@ const U = final.uniforms;
 
 function postDefaults() {
   return {
-    radial: 0, ca: 0, swirl: 0, shrink: 0, pinch: 0, ovSwirl: 0, ovShrink: 0, point: 0, flash: 0, sceneGain: 1,
+    radial: 0, ca: 0, swirl: 0, shrink: 0, pinch: 0, ovSwirl: 0, ovShrink: 0, point: 0, flash: 0, sceneGain: 1, center: [0.5, 0.5],
     vignette: 0.3, grain: 0.03, exposure: 1, saturation: 1, contrast: 1, bloom: 0.8, bloomRadius: 0.5, bloomThreshold: 0.8,
   };
 }
@@ -58,7 +58,7 @@ function setTime(t) {
   const post = postDefaults();
   let scene = blank, camera = blankCam;
 
-  if (t >= TL.IN.approach[0] && t < TL.IN.flash) {
+  if (t >= TL.IN.open && t < TL.IN.flash) {
     tunnel.update(t, post);
     scene = tunnel.scene; camera = tunnel.camera;
   } else if (t >= TL.IN.flash && t < TL.OUT.flash) {
@@ -71,10 +71,10 @@ function setTime(t) {
   }
 
   // ---- transitions
-  // opening: the overlay pulls the words back into a spiral itself (no 2D warp)
+  // opening: on enter the cable glows open behind the words (they're still 2D until the handoff,
+  // then the tunnel scene owns them and sucks them in)
+  if (t >= TL.IN.open && t < TL.IN.handoff + 0.2) post.sceneGain = smoothstep(TL.IN.open, TL.IN.handoff, t);
   // the point: grows as the text collapses, hands over to the cable end as we dive in
-  post.point = Math.max(post.point,
-    smoothstep(TL.IN.suck[0] + 0.3, TL.IN.suck[1], t) * (1 - smoothstep(TL.IN.approach[0] + 0.14, TL.IN.approach[0] + 0.44, t)));
   // into the world: white burst
   if (t >= TL.IN.flash - 0.16 && t < TL.IN.flash + 0.6) {
     post.flash = t < TL.IN.flash ? easeInExpo(invLerp(TL.IN.flash - 0.16, TL.IN.flash, t)) : Math.pow(1 - invLerp(TL.IN.flash, TL.IN.flash + 0.5, t), 2.2);
@@ -112,6 +112,7 @@ function setTime(t) {
   U.uOvSwirl.value = post.ovSwirl;
   U.uOvShrink.value = post.ovShrink;
   U.uPoint.value = post.point;
+  U.uCenter.value.set(post.center[0], post.center[1]);
   U.uFlash.value = post.flash;
   U.uSceneGain.value = post.sceneGain;
   U.uVignette.value = post.vignette;

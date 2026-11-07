@@ -36,13 +36,24 @@ export const OPEN = {
 };
 
 // ---- Act 2: sucked into the cable ---------------------------------------------------------------
-const IN_SUCK_END = OPEN.enter + 0.86;
-const IN_DIVE_END = IN_SUCK_END + 0.46;
+// On enter the cable mouth glows open behind the words; the words are handed to the 3D scene and
+// sucked into it (centre letters first), then the camera dives in after them.
+const IN_OPEN = OPEN.enter;
+const IN_HANDOFF = IN_OPEN + 0.16; // 2D text -> 3D letters (they start moving here)
+const IN_LETTER_T = 0.42; // seconds from a letter's start to the mouth
+const IN_STAGGER = 0.012; // between letters (19 of them)
+const IN_SWALLOW = [IN_HANDOFF + IN_LETTER_T, IN_HANDOFF + IN_LETTER_T + 18 * IN_STAGGER];
+const IN_DIVE = [IN_OPEN + 0.66, IN_OPEN + 1.2];
 export const IN = {
-  suck: [OPEN.enter, IN_SUCK_END], // the words are pulled backwards into a spiral, into a point
-  approach: [IN_SUCK_END - 0.1, IN_DIVE_END], // the cable end grows out of the point; we dive in
-  tunnel: [IN_DIVE_END, IN_DIVE_END + 1.2], // inside the cable, accelerating
-  flash: IN_DIVE_END + 1.2, // white-out at the end of the cable = the drop
+  open: IN_OPEN,
+  handoff: IN_HANDOFF,
+  letterT: IN_LETTER_T,
+  stagger: IN_STAGGER,
+  swallow: IN_SWALLOW, // letters cross the mouth
+  suck: [IN_OPEN, IN_SWALLOW[1] + 0.05], // the whole pull, for the sound
+  approach: IN_DIVE, // the camera dives in after them
+  tunnel: [IN_DIVE[1], IN_DIVE[1] + 1.2], // inside the cable, accelerating
+  flash: IN_DIVE[1] + 1.2, // white-out at the end of the cable = the drop
 };
 
 // ---- Act 3: the game world ----------------------------------------------------------------------
@@ -116,6 +127,7 @@ export function events() {
   keys(OPEN.text, OPEN.keys, 'open');
   ev.push({ t: OPEN.enter, type: 'enter', tag: 'open' });
   ev.push({ t: IN.suck[0], type: 'suck', end: IN.suck[1] });
+  ev.push({ t: IN.swallow[0], type: 'swallow', end: IN.swallow[1] });
   ev.push({ t: IN.approach[0], type: 'dive', end: IN.approach[1] });
   ev.push({ t: IN.tunnel[0], type: 'tunnel', end: IN.tunnel[1] });
   ev.push({ t: IN.flash, type: 'drop' });

@@ -566,17 +566,32 @@ whine = np.sin(2 * np.pi * 15734 / 2 * pw_t) * np.exp(-pw_t / 0.3) * 0.015
 fx.add(power + whine, 0.0, -16.0)
 
 s0, s1 = TL['in']['suck']
-suck = whoosh(s1 - s0 + 0.05, 300, 5000, 1.0, 'rise')
-fx.add(suck, s0, -12.0)
-zip_n = int((s1 - s0) * SR)
-zu = np.linspace(0, 1, zip_n)
-zipper = sine(220 * (8 ** (zu ** 2)), zip_n) * zu ** 2 * 0.6
-fx.add(zipper, s0, -16.0)
-pop_n = int(0.25 * SR)
-pt = np.arange(pop_n) / SR
-pop = np.sin(2 * np.pi * (900 + 1200 * np.exp(-pt / 0.01)) * pt) * np.exp(-pt / 0.04)
-fx.add(pop, s1 - 0.01, -16.0)
-verb_send.add(pan2(pop), s1 - 0.01, -18.0)
+sw0, sw1 = TL['in']['swallow']
+# enter: the cable opens behind the words (a soft low "vmm" and a breath of air)
+op_n = int(0.9 * SR)
+op_t = np.arange(op_n) / SR
+opening = np.sin(2 * np.pi * (38 + 30 * (1 - np.exp(-op_t / 0.25))) * op_t) * np.minimum(1, op_t / 0.06) * np.exp(-op_t / 0.5)
+fx.add(opening, s0, -12.0)
+fx.add(whoosh(0.5, 2500, 800, 1.2, 'fall'), s0, -24.0)
+# the suction: air rushing in, rising until the last letter is gone
+suck = whoosh(s1 - s0 + 0.08, 220, 4200, 0.9, 'rise')
+fx.add(suck, s0, -11.0)
+vac_n = int((s1 - s0 + 0.08) * SR)
+vu = np.linspace(0, 1, vac_n)
+vac = filt(saw(46 + 30 * vu ** 2, vac_n) + saw(46.4 + 30 * vu ** 2, vac_n), 'low', 260) * vu ** 1.6
+fx.add(vac, s0, -18.0)
+# each letter swallowed: a tiny blip, rising
+n_letters = 19
+for k in range(n_letters):
+    bt = sw0 + (sw1 - sw0) * k / (n_letters - 1)
+    b = pluck(84 + k * 0.9, 0.06, 'tri') * 0.7
+    fx.add(b, bt, -27.0 + k * 0.25, ((k % 2) - 0.5) * 0.4)
+# gulp as the last one goes in
+gl_n = int(0.35 * SR)
+gt = np.arange(gl_n) / SR
+gulp = np.sin(2 * np.pi * (160 * np.exp(-gt / 0.05) + 55) * gt) * np.exp(-gt / 0.09)
+fx.add(gulp, sw1 + 0.02, -15.0)
+verb_send.add(pan2(gulp), sw1 + 0.02, -20.0)
 
 a0, a1 = TL['in']['approach']
 fx.add(whoosh(a1 - a0 + 0.1, 120, 2500, 0.9, 'rise'), a0, -11.0)
@@ -740,9 +755,13 @@ lufs = meter.integrated_loudness(mix.T)
 mix *= db(-14.0 - lufs)
 
 
-def limiter(x, ceiling_db=-1.8, look=0.004, release=0.08):
+def limiter(x, ceiling_db=-1.3, look=0.004, release=0.08):
     ceil = db(ceiling_db)
-    peak = np.max(np.abs(x), axis=0)
+    # true-peak envelope: the 4x oversampled peak around each sample
+    up = np.abs(signal.resample_poly(x, 4, 1, axis=1))
+    n_ = x.shape[1]
+    up = up[:, : n_ * 4].reshape(2, n_, 4).max(axis=2)
+    peak = np.max(up, axis=0)
     need = np.minimum(1.0, ceil / np.maximum(peak, 1e-9))
     w = int(look * SR)
     g = minimum_filter1d(need, size=2 * w + 1, mode='nearest')

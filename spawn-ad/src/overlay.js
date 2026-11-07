@@ -63,7 +63,7 @@ export class Overlay {
     this.lastKey = key;
     const { ctx, W, H } = this;
     ctx.clearRect(0, 0, W, H);
-    if (t < IN.approach[1]) this.drawOpening(t);
+    if (t < IN.handoff) this.drawOpening(t);
     if (t >= WORLD.barIn - 0.05 && t < OUT.flash + 0.05) this.drawBar(t);
     if (t >= END.cursorAt - 0.02) this.drawEnd(t);
     return true;
@@ -71,7 +71,7 @@ export class Overlay {
 
   // Quantized description of what's on screen; identical keys mean identical pixels.
   stateKey(t) {
-    if (t < IN.suck[1] + 0.05) {
+    if (t < IN.handoff + 0.05) {
       const n = count(OPEN.keys, t);
       return `o|${n}|${this.openCursorOn(t)}|${t < OPEN.keys[0] ? 0 : Math.round(t * 60)}|${t > OPEN.enter ? Math.round(t * 60) : 0}`;
     }
@@ -83,8 +83,7 @@ export class Overlay {
   // ---------------------------------------------------------------- opening
   openCursorOn(t) {
     if (t < OPEN.keys[0]) return OPEN.blink.some(([a, b]) => t >= a && t < b);
-    if (t < OPEN.enter + 0.02) return true;
-    return false;
+    return t < IN.handoff;
   }
 
   /** Centred typing line with a glide, used by the opening and the end card. */
@@ -114,86 +113,21 @@ export class Overlay {
 
   drawOpening(t) {
     const { ctx, s } = this;
+    if (t >= IN.handoff) return; // from here the 3D tunnel scene owns the letters
     const px = 76;
     const y = this.H / 2 + 0.3 * px * s;
     const L = this.centeredLine(OPEN.text, OPEN.keys, t, px, y);
-    if (t < IN.suck[0]) {
-      ctx.save();
-      ctx.font = this.font(px);
-      ctx.textBaseline = 'alphabetic';
-      ctx.shadowColor = 'rgba(255,255,255,0.35)';
-      ctx.shadowBlur = 16 * s;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(OPEN.text.slice(0, L.n), L.x0, y);
-      ctx.restore();
-      if (this.openCursorOn(t)) this.drawCursor(L.x0 + L.wText + L.gap, y, px, 1);
-      return;
-    }
-    this.drawPulledBack(t, L, px, y);
-  }
-
-  /**
-   * After enter: every letter (and the cursor) is pulled backwards into the screen along a spiral:
-   * it recedes in depth (perspective shrink toward the centre) while orbiting it, inner letters first.
-   */
-  drawPulledBack(t, L, px, y) {
-    const { ctx, s, W, H } = this;
-    const cx = W / 2, cy = H / 2;
-    const text = OPEN.text;
-    const items = [];
-    let x = L.x0;
-    ctx.font = this.font(px);
-    for (let i = 0; i < text.length; i++) {
-      const w = this.width(text[i], px);
-      if (text[i] !== ' ') items.push({ ch: text[i], x: x + w / 2, y: y - 0.33 * px * s });
-      x = L.x0 + this.width(text.slice(0, i + 1), px);
-    }
-    items.push({ cursor: true, x: L.x0 + L.wText + L.gap + L.cw / 2, y: y - 0.78 * px * s + 0.475 * px * s });
-    const maxDx = Math.max(...items.map((it) => Math.abs(it.x - cx)));
-    const D = (IN.suck[1] - IN.suck[0]) * 0.74;
-    const pose = (it, tt) => {
-      const delay = (Math.abs(it.x - cx) / maxDx) * (IN.suck[1] - IN.suck[0] - D);
-      const u = clamp((tt - IN.suck[0] - delay) / D);
-      const z = 1 + 17 * Math.pow(u, 2.0);
-      const th = 2.9 * Math.pow(u, 1.15);
-      const r = 1 - 0.25 * u;
-      const dx = (it.x - cx) * r, dy = (it.y - cy) * r;
-      return {
-        u, z, th,
-        x: cx + (dx * Math.cos(th) - dy * Math.sin(th)) / z,
-        y: cy + (dx * Math.sin(th) + dy * Math.cos(th)) / z,
-      };
-    };
+    // a little kick of light on enter, as the cable opens behind the words
+    const kick = t >= IN.open ? Math.exp(-(t - IN.open) * 18) : 0;
     ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(255,236,210,0.6)';
-    ctx.shadowBlur = 14 * s;
-    for (const it of items) {
-      // motion trail first, then the letter
-      for (let k = 3; k >= 0; k--) {
-        const p = pose(it, t - k * 0.022);
-        if (k > 0 && p.u < 0.08) continue;
-        const a = (1 - smoothstep(0.72, 1, p.u)) * (k === 0 ? 1 : 0.32 / k);
-        if (a <= 0.003) continue;
-        ctx.save();
-        ctx.globalAlpha = a;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.th);
-        ctx.scale(1 / p.z, 1 / p.z);
-        // warm up as it falls in
-        const warm = smoothstep(0.25, 0.9, p.u);
-        ctx.fillStyle = `rgb(255,${Math.round(255 - 38 * warm)},${Math.round(255 - 95 * warm)})`;
-        if (it.cursor) {
-          const cw = 0.42 * px * s, ch = 0.95 * px * s;
-          ctx.fillRect(-cw / 2, -ch / 2, cw, ch);
-        } else {
-          ctx.fillText(it.ch, 0, 0);
-        }
-        ctx.restore();
-      }
-    }
+    ctx.font = this.font(px);
+    ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = `rgba(255,236,210,${0.35 + 0.4 * kick})`;
+    ctx.shadowBlur = (16 + 14 * kick) * s;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(OPEN.text.slice(0, L.n), L.x0, y);
     ctx.restore();
+    if (this.openCursorOn(t)) this.drawCursor(L.x0 + L.wText + L.gap, y, px, 1);
   }
 
   // ---------------------------------------------------------------- chat bar
