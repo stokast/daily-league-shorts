@@ -11,6 +11,7 @@ import { FinalShader } from './post.js';
 import { Tunnel } from './tunnel.js';
 import { World } from './world.js';
 import { Panels } from './panels.js';
+import { Rider } from './rider.js';
 import { clamp, smoothstep, invLerp, easeInCubic, easeOutCubic, easeInExpo } from './util.js';
 
 const q = new URLSearchParams(location.search);
@@ -46,7 +47,10 @@ const overlay = new Overlay(W, H);
 final.uniforms.tOverlay.value = overlay.texture;
 const tunnel = new Tunnel(W, H);
 const world = new World(W, H);
-const panels = new Panels(W, H, world, overlay);
+if (world.init) await world.init(); // async loading (textures, sky)
+const rider = new Rider(world.scene);
+await rider.init();
+const panels = new Panels(W, H, world, overlay, rider);
 await panels.init();
 
 const U = final.uniforms;
@@ -68,6 +72,7 @@ function setTime(t) {
     scene = tunnel.scene; camera = tunnel.camera;
   } else if (t >= TL.IN.flash && t < TL.OUT.flash) {
     world.update(t, post);
+    rider.update(t);
     if (!ONLY_WORLD) panels.update(t, post);
     scene = world.scene; camera = world.camera;
   } else if (t >= TL.OUT.flash && t < TL.OUT.recede[1]) {

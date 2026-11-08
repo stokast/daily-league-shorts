@@ -16,7 +16,7 @@ export class PromptCard {
    * @param {'big'|'small'} size texture resolution
    * @param {string|null} highlight a word drawn in peach once typed (e.g. 'anything')
    */
-  constructor(text, keys, enter, size = 'big', highlight = null) {
+  constructor(text, keys, enter, size = 'big', highlight = null, { tail = false } = {}) {
     this.text = text;
     this.keys = keys;
     this.enter = enter;
@@ -24,9 +24,11 @@ export class PromptCard {
     const W = size === 'big' ? 1400 : 1000;
     const H = Math.round(W / 7);
     this.W = W; this.H = H;
-    this.aspectInv = H / W;
+    // a speech bubble gets a little tail under it, pointing at whoever is talking
+    this.tailH = tail ? Math.round(H * 0.3) : 0;
+    this.aspectInv = (H + this.tailH) / W;
     this.canvas = document.createElement('canvas');
-    this.canvas.width = W; this.canvas.height = H;
+    this.canvas.width = W; this.canvas.height = H + this.tailH;
     this.ctx = this.canvas.getContext('2d');
     this.tex = new THREE.CanvasTexture(this.canvas);
     this.tex.colorSpace = THREE.SRGBColorSpace;
@@ -39,7 +41,7 @@ export class PromptCard {
     const w100 = this.ctx.measureText(text).width;
     this.px = Math.min(H * 0.42, ((W - this.left - this.right - H * 0.3) / w100) * 100);
     this.mat = new THREE.MeshBasicMaterial({ map: this.tex, transparent: true, depthWrite: false, toneMapped: false });
-    this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, H / W), this.mat);
+    this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, (H + this.tailH) / W), this.mat);
     this.mesh.renderOrder = 3;
     this.base = 1;
     this.state = null;
@@ -67,8 +69,22 @@ export class PromptCard {
 
   draw(n, blink, flash, pulse) {
     const { ctx, W, H } = this;
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H + this.tailH);
     const m = 5, r = (H - 2 * m) * 0.32;
+    if (this.tailH) {
+      // tail: a small wedge under the bubble, toward the speaker
+      const tx = W * 0.5, tw = H * 0.32;
+      ctx.beginPath();
+      ctx.moveTo(tx - tw / 2, H - m - 2);
+      ctx.lineTo(tx + tw / 2, H - m - 2);
+      ctx.lineTo(tx, H + this.tailH - 4);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(9,10,12,0.88)';
+      ctx.fill();
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.stroke();
+    }
     roundRect(ctx, m, m, W - 2 * m, H - 2 * m, r);
     ctx.fillStyle = 'rgba(9,10,12,0.88)';
     ctx.fill();

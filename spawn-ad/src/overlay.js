@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import {
   OPEN, PROMPTS, MONTAGE, MONTAGE_PREFIX, MONTAGE_SUFFIX, MONTAGE_START, CLIMAX, WORLD, OUT, END, IN,
 } from './timeline.js';
-import { clamp, easeOutCubic, easeOutBack, easeInCubic, smoothstep, lerp } from './util.js';
+import { clamp, easeOutCubic, easeOutBack, easeInCubic, smoothstep, lerp, hash } from './util.js';
+import { riderZ, trailX } from './ride.js';
 
 const PEACH = '#ffd9a0';
 const PIXEL = '"Geist Pixel"';
@@ -64,7 +65,7 @@ export class Overlay {
     const { ctx, W, H } = this;
     ctx.clearRect(0, 0, W, H);
     if (t < IN.handoff) this.drawOpening(t);
-    if (t >= WORLD.start && t < OUT.flash + 0.05) this.drawStreaks();
+    if (t >= WORLD.start && t < OUT.flash + 0.05) { this.drawHUD(t); this.drawStreaks(); }
     if (t >= END.cursorAt - 0.02) this.drawEnd(t);
     return true;
   }
@@ -75,7 +76,7 @@ export class Overlay {
       const n = count(OPEN.keys, t);
       return `o|${n}|${this.openCursorOn(t)}|${t < OPEN.keys[0] ? 0 : Math.round(t * 60)}|${t > OPEN.enter ? Math.round(t * 60) : 0}`;
     }
-    if (t >= WORLD.start && t < OUT.flash + 0.05) return this.streaks.length ? `s|${Math.round(t * 120)}` : 'blank'; // only the streaks now
+    if (t >= WORLD.start && t < OUT.flash + 0.05) return `w|${Math.round(t * 60)}|${this.streaks.length}`; // HUD + streaks
     if (t >= END.cursorAt - 0.02) return `e|${Math.round(t * 120)}`;
     return 'blank';
   }
@@ -251,6 +252,118 @@ export class Overlay {
   }
 
   // a comet from the prompt to where its game is about to appear
+  // ---------------------------------------------------------------- MMO HUD
+  drawHUD(t) {
+    const { ctx, s, W } = this;
+    const a = smoothstep(WORLD.start + 0.35, WORLD.start + 0.9, t) * (1 - smoothstep(OUT.vortex[0], OUT.vortex[0] + 0.25, t));
+    if (a <= 0.001) return;
+    ctx.save();
+    ctx.globalAlpha = a;
+    const y0 = 176 * s;
+    // player frame (top left): portrait with Spawn's sparkle, level, name, health and mana
+    const px = 44 * s, pr = 46 * s;
+    const cx = px + pr, cy = y0 + pr;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 12 * s;
+    ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(10,11,14,0.86)';
+    ctx.fill();
+    ctx.restore();
+    ctx.lineWidth = 4 * s; ctx.strokeStyle = PEACH; ctx.stroke();
+    this.drawSparkle(cx, cy, 3.6 * s, 1, 0.7);
+    // level badge
+    ctx.beginPath(); ctx.arc(px + 8 * s, y0 + 2 * pr - 6 * s, 17 * s, 0, Math.PI * 2);
+    ctx.fillStyle = '#0b0c10'; ctx.fill();
+    ctx.lineWidth = 2.5 * s; ctx.strokeStyle = PEACH; ctx.stroke();
+    ctx.font = this.font(19); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('60', px + 8 * s, y0 + 2 * pr - 5 * s);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    const bx = px + 2 * pr + 14 * s, bw = 236 * s;
+    ctx.font = this.font(28); ctx.fillStyle = '#fff';
+    ctx.fillText('you', bx, y0 + 26 * s);
+    const bar = (yy, h, frac, c0, c1) => {
+      roundRect(ctx, bx, yy, bw, h, h / 2);
+      ctx.fillStyle = 'rgba(10,11,14,0.8)'; ctx.fill();
+      ctx.save(); ctx.clip();
+      const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+      g.addColorStop(0, c0); g.addColorStop(1, c1);
+      ctx.fillStyle = g; ctx.fillRect(bx, yy, bw * frac, h);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(bx, yy, bw * frac, h * 0.4);
+      ctx.restore();
+      ctx.lineWidth = 2 * s; ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      roundRect(ctx, bx, yy, bw, h, h / 2); ctx.stroke();
+    };
+    bar(y0 + 40 * s, 18 * s, 1.0, '#47d76a', '#2a9d4a');
+    bar(y0 + 66 * s, 12 * s, 0.82 + 0.1 * Math.sin(t * 0.7), '#22d3ee', '#1d96a0');
+
+    // minimap (top right): road, houses, the player arrow, the games as markers
+    const mr = 80 * s, mx = W - 44 * s - mr, my = y0 + mr;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(28,46,36,0.88)'; ctx.fill();
+    ctx.clip();
+    const scale = 2.3 * s; // px per metre
+    const rz = riderZ(t);
+    // houses either side of the road (a fixed pseudo-random layout that scrolls past)
+    ctx.fillStyle = 'rgba(214,190,150,0.75)';
+    for (let k = 0; k < 40; k++) {
+      const z = 14 - k * 4.1;
+      const side = k % 2 ? 1 : -1;
+      const hx = trailX(z) + side * (6 + hash(k, 1) * 3), w = (3.5 + hash(k, 2) * 2) * scale, d = (3 + hash(k, 3) * 2) * scale;
+      const sx = mx + (hx - trailX(rz)) * scale, sy = my + (z - rz) * scale;
+      if (Math.abs(sy - my) < mr + 20 * s) ctx.fillRect(sx - w / 2, sy - d / 2, w, d);
+    }
+    // the road
+    ctx.strokeStyle = 'rgba(232,206,160,0.9)'; ctx.lineWidth = 7 * s; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let k = -40; k <= 40; k++) {
+      const z = rz + k;
+      const sx = mx + (trailX(z) - trailX(rz)) * scale, sy = my + k * scale;
+      if (k === -40) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+    // games created so far, as markers where they appeared
+    for (const g of this.markers || []) {
+      if (t < g.t) continue;
+      const sx = mx + (g.x - trailX(rz)) * 3.2 * scale, sy = my + (g.z - rz) * scale;
+      ctx.fillStyle = '#1a1208';
+      ctx.fillRect(sx - 7.5 * s, sy - 7.5 * s, 15 * s, 15 * s);
+      ctx.fillStyle = PEACH;
+      ctx.fillRect(sx - 5.5 * s, sy - 5.5 * s, 11 * s, 11 * s);
+    }
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2);
+    ctx.lineWidth = 5 * s; ctx.strokeStyle = '#c9a26a'; ctx.stroke();
+    ctx.lineWidth = 2 * s; ctx.strokeStyle = 'rgba(255,236,200,0.6)'; ctx.stroke();
+    // player arrow
+    ctx.fillStyle = PEACH;
+    ctx.beginPath(); ctx.moveTo(mx, my - 12 * s); ctx.lineTo(mx + 8 * s, my + 9 * s); ctx.lineTo(mx, my + 4 * s); ctx.lineTo(mx - 8 * s, my + 9 * s); ctx.closePath(); ctx.fill();
+    ctx.font = this.font(18); ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.fillText('N', mx, my - mr + 22 * s);
+    // zone name + quest tracker on a dark panel under the map
+    const qw = 300 * s, qh = 132 * s, qx1 = W - 44 * s, qx0 = qx1 - qw, qy0 = my + mr + 14 * s;
+    ctx.save();
+    roundRect(ctx, qx0, qy0, qw, qh, 16 * s);
+    ctx.fillStyle = 'rgba(10,11,14,0.62)';
+    ctx.fill();
+    ctx.restore();
+    ctx.textAlign = 'right';
+    const qx = qx1 - 16 * s;
+    ctx.font = this.font(24); ctx.fillStyle = PEACH;
+    ctx.fillText('spawn village', qx, qy0 + 32 * s);
+    ctx.font = this.font(20); ctx.fillStyle = 'rgba(255,217,160,0.8)';
+    ctx.fillText('quest', qx, qy0 + 62 * s);
+    ctx.font = this.font(27); ctx.fillStyle = '#fff';
+    ctx.fillText('make anything', qx, qy0 + 92 * s);
+    const n = this.spawned || 0;
+    const bump = this.spawnedAt ? Math.exp(-(t - this.spawnedAt) * 8) : 0;
+    ctx.font = this.font(23 * (1 + 0.12 * bump)); ctx.fillStyle = `rgba(255,255,255,${0.8 + 0.2 * bump})`;
+    ctx.fillText(`games created ${n}/22`, qx, qy0 + 120 * s);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  }
+
   drawStreaks() {
     const { ctx, s } = this;
     for (const st of this.streaks) {

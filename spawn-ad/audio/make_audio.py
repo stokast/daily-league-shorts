@@ -531,20 +531,59 @@ music_mix = mus
 
 # ---------------------------------------------------------------------------- the keyboard
 ev = TL['events']
-key_seed = 100
+
+
+# typing: soft in-key text blips (like dialogue text in an RPG), not keyboard clicks.
+# Each letter gets a note from F major pentatonic picked by the letter, so a phrase has its own tune.
+PENTA = [77, 79, 81, 84, 86, 89]  # F5 G5 A5 C6 D6 F6
+
+
+def text_blip(note, bright=1.0, dur=0.12):
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = midi(note)
+    tone = 0.62 * np.sin(2 * np.pi * f * t) + 0.18 * np.sin(2 * np.pi * 2 * f * t) + 0.22 * pulse(f, n, 0.25)
+    tone = filt(tone, 'low', 3600 * bright)
+    env = np.minimum(1, t / 0.003) * np.exp(-t / 0.038)
+    tick = filt(noise(n), 'high', 5000) * np.exp(-t / 0.0015) * 0.08
+    return tone * env + tick
+
+
+def send_chime():
+    a = bell(84, 0.7, 0.5) * 0.55
+    b = bell(89, 0.9, 0.5) * 0.6
+    out = np.zeros(len(b) + int(0.06 * SR))
+    out[: len(a)] += a
+    out[int(0.06 * SR): int(0.06 * SR) + len(b)] += b
+    return out
+
+
+typed = {'open': 0, 'end': 0, 'world': 0, 'fast': 0, 'montage': 0}
 for e in ev:
     if e['type'] == 'key':
         tag = e['tag']
-        kind = 'space' if e['ch'] == ' ' else ('light' if tag in ('fast', 'montage') else 'key')
-        lvl = {'open': -10.0, 'end': -10.0, 'world': -14.0, 'fast': -18.0, 'montage': -25.0}[tag]
-        keys.add(key_click(kind, 1.0, key_seed), e['t'] - 0.004, lvl)
-        key_seed += 1
+        i = typed[tag]
+        typed[tag] += 1
+        if e['ch'] == ' ':
+            continue
+        # thin out fast typing so it stays a sparkle, not a buzz
+        if tag == 'fast' and i % 2:
+            continue
+        if tag == 'montage' and i % 3:
+            continue
+        note = PENTA[(ord(e['ch']) * 5 + i) % len(PENTA)]
+        if tag in ('open', 'end'):
+            note -= 12  # warmer on the black screen
+        else:
+            note += 12  # over the music, an octave above the arp so it sparkles on top
+        lvl = {'open': -9.5, 'end': -9.5, 'world': -17.0, 'fast': -20.0, 'montage': -27.0}[tag]
+        keys.add(text_blip(note, 0.8 if tag in ('open', 'end') else 1.0), e['t'] - 0.002, lvl, ((i % 5) - 2) * 0.08)
     elif e['type'] == 'enter':
-        lvl = -7.0 if e['tag'] == 'open' else -14.0
-        keys.add(key_click('enter', 1.0, key_seed), e['t'] - 0.004, lvl)
-        key_seed += 1
-        if e['tag'] != 'open':
-            fx.add(whoosh(0.16, 1500, 7000, 1.5, 'swell'), e['t'], -24.0)
+        if e['tag'] == 'open':
+            keys.add(send_chime(), e['t'], -14.0)
+        else:
+            keys.add(send_chime(), e['t'], -19.0)
+            fx.add(whoosh(0.16, 1500, 7000, 1.5, 'swell'), e['t'], -26.0)
 
 # ------------------------------------------------------------------------------- the trip in
 OPEN_END = TL['open']['enter']

@@ -24,7 +24,8 @@ const EYE = 1.7;
 const PITCH = 10; // degrees up: looking at the sky
 const Z_START = 3.0;
 /** The trail's centre line. */
-export const trailX = (z) => 1.1 * Math.sin(z * 0.055 + 0.5) - 0.45;
+import { trailX, cameraBase, cameraPose } from './ride.js';
+export { trailX };
 
 // The sun: low, ahead and to the left (azimuth from straight ahead (-z), negative = left; degrees).
 const SUN_AZ = -40, SUN_EL = 12;
@@ -278,23 +279,14 @@ export class World {
 
   // ------------------------------------------------------------------ camera
   /** Where the walk is at time t (the title screens follow this). */
+  /** The camera's base pose (the ride decides it: third person behind the rider; see ride.js). */
   basePose(t) {
-    const z = Z_START - WALK_SPEED * Math.max(0, t - W0);
-    const x = trailX(z) * 0.85;
-    const pos = new THREE.Vector3(x, this.groundAt(x, z) + EYE, z);
-    // heading follows the trail, smoothed
-    const ahead = z - 6;
-    const yaw = Math.atan2(-(trailX(ahead) * 0.85 - x), 6) * 0.6;
-    const quat = new THREE.Quaternion().setFromEuler(new THREE.Euler(THREE.MathUtils.degToRad(PITCH), yaw, 0, 'YXZ'));
-    return { pos, quat };
+    return cameraBase(t);
   }
 
-  /** Camera pose at time t: the smooth walk, plus the lunge into the vortex at the end. */
+  /** Camera pose at time t: the smooth follow, plus the lunge into the vortex at the end. */
   camPose(t) {
-    const { pos, quat } = this.basePose(t);
-    const v = easeInCubic(invLerp(OUT.vortex[0], OUT.vortex[1], t));
-    if (v > 0) pos.add(new THREE.Vector3(0, 0, -1).applyQuaternion(quat).multiplyScalar(v * 3));
-    return { pos, quat };
+    return cameraPose(t);
   }
 
   groundAt(x, z) {
