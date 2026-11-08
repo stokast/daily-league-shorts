@@ -40,6 +40,10 @@ node tools/screens-sheet.mjs fighter,shooter 0.2,1,3 scratch/s.png         # rev
 ```
 Chromium and Playwright must be installed (the render uses SwiftShader, so no GPU is needed).
 
+To render on a graphics card instead, with nothing installed where it renders: `npm run gpu-pack` bundles the
+ad (after `npm run audio`) into `../gpu-render/dist/spawn-ad`, which Claude publishes as a private link. Open it
+in Chrome or Edge and press Render video. See `../gpu-render/README.md`.
+
 ## Map
 - `src/timeline.js`: every time in the ad (typing is humanized, prompts land on the 120 BPM grid). The page
   and `audio/make_audio.py` both read it, so picture and sound stay in sync.

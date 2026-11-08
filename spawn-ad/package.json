@@ -6,7 +6,8 @@
     "timeline": "node tools/timeline-json.mjs",
     "audio": "node tools/timeline-json.mjs && python3 audio/make_audio.py build/timeline.json build/audio.wav",
     "preview": "node render/render.mjs --w 540 --h 960 --jobs 2 --preset veryfast --crf 20 --out build/preview_540.mp4 --audio build/audio.wav",
-    "render": "node render/render.mjs --jobs 2 --out build/spawn-ad-1080x1920.mp4 --audio build/audio.wav"
+    "render": "node render/render.mjs --jobs 2 --out build/spawn-ad-1080x1920.mp4 --audio build/audio.wav",
+    "gpu-pack": "node ../gpu-render/pack.mjs . --name spawn-ad --title \"Spawn Ad Render\" --audio build/audio.wav --bitrate 40000000 --out ../gpu-render/dist/spawn-ad"
   },
   "dependencies": {
     "@fontsource/anton": "^5.3.0",
