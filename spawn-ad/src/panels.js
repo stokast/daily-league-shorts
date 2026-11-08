@@ -11,7 +11,7 @@ import { clamp, lerp, smoothstep, invLerp, easeOutCubic, easeInOutCubic, easeInC
 const TAN_V = Math.tan(THREE.MathUtils.degToRad(31)); // half vertical fov (62 deg)
 
 // Where things go, in frame-normalised coords (sx, sy in -1..1 of the frame at that depth) and depth d.
-const STAGE = { sx: 0, sy: 0.33, d: 6.3, w: 3.25 };
+const STAGE = { sx: 0, sy: 0.42, d: 6.3, w: 3.25 };
 const ASIDE = {
   fighter: { sx: -0.98, sy: 0.6, d: 9.0, w: 3.0 },
   shooter: { sx: 1.0, sy: 0.36, d: 9.6, w: 3.0 },
