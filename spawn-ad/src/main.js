@@ -48,7 +48,7 @@ final.uniforms.tOverlay.value = overlay.texture;
 const tunnel = new Tunnel(W, H);
 const world = new World(W, H);
 if (world.init) await world.init(); // async loading (textures, sky)
-const rider = new Rider(world.scene);
+const rider = new Rider(world.scene, world);
 await rider.init();
 const panels = new Panels(W, H, world, overlay, rider);
 await panels.init();

@@ -9,9 +9,10 @@ export const trailX = (z) => 1.1 * Math.sin(z * 0.055 + 0.5) - 0.45;
 
 export const RIDE_SPEED = 4.2; // m/s, an easy canter
 export const RIDE_Z0 = 6.0; // rider's z when the world appears
-export const CAM_BACK = 6.6; // camera distance behind the rider
-export const CAM_UP = 3.25; // camera height
+export const CAM_BACK = 7.0; // camera distance behind the rider
+export const CAM_UP = 3.1; // camera height
 export const CAM_PITCH = 4.5; // degrees up
+export const CAM_SIDE = 1.5; // camera off to the left of the rider (a three-quarter view of the mount)
 
 /** Rider z at time t: already cantering when the world appears. */
 export function riderZ(t) {
@@ -41,8 +42,10 @@ export function cameraBase(t) {
   const a = new THREE.Vector3(trailX(zc), 0, zc);
   const b = new THREE.Vector3(trailX(rp.z - 10), 0, rp.z - 10);
   const fwd = b.sub(a).normalize();
-  const pos = new THREE.Vector3(trailX(zc) * 0.6 + rp.x * 0.4, CAM_UP, zc);
-  const yaw = Math.atan2(-fwd.x, -fwd.z);
+  const right = new THREE.Vector3(-fwd.z, 0, fwd.x);
+  const pos = new THREE.Vector3(trailX(zc) * 0.6 + rp.x * 0.4, CAM_UP, zc).addScaledVector(right, -CAM_SIDE);
+  // turned most of the way back toward the rider, so they stay near the middle and we still look down the road
+  const yaw = Math.atan2(-fwd.x, -fwd.z) - 0.85 * Math.atan2(CAM_SIDE, CAM_BACK);
   const quat = new THREE.Quaternion().setFromEuler(new THREE.Euler(THREE.MathUtils.degToRad(CAM_PITCH), yaw, 0, 'YXZ'));
   return { pos, quat };
 }

@@ -1,6 +1,6 @@
 {
-  "about": "Third-party assets for the village ride (src/world.js, src/assets.js). Every one is CC0 1.0 (public domain, https://creativecommons.org/publicdomain/zero/1.0/): free to use, change and ship, no attribution required. `node tools/fetch-assets.mjs` downloads them into assets/ (git-ignored) and bakes the sky from the HDRI.",
-  "licence": "CC0 1.0",
+  "about": "Third-party assets for the village ride (src/world.js, src/assets.js) and the mount (src/horse.js). All are CC0 1.0 (public domain, https://creativecommons.org/publicdomain/zero/1.0/: free to use, change and ship, no attribution required) except the horse, which is CC BY 4.0: credit its author wherever the ad is published (see `horse.credit`). `node tools/fetch-assets.mjs` downloads them into assets/ (git-ignored) and bakes the sky from the HDRI.",
+  "licence": "CC0 1.0, except `horse`: CC BY 4.0",
   "sky": {
     "id": "kloppenheim_06_puresky",
     "name": "Kloppenheim 06 (Pure Sky)",
@@ -145,11 +145,14 @@
     }
   ],
   "horse": {
-    "name": "Horse (Ultimate Animated Animals, July 2021)",
-    "source": "Quaternius",
-    "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
-    "download": "https://drive.google.com/drive/folders/1uJ3N5HfB7jKTseJUNQr3N4YaN0UuEtHk",
-    "licence": "CC0 1.0",
-    "use": "the rider's mount (src/rider.js): Horse.gltf with its Gallop animation"
+    "name": "HORSE [DRAFT HORSE]",
+    "author": "BlueMesh (Sketchfab; published as VapTor)",
+    "url": "https://sketchfab.com/3d-models/725065392aad4b04b7a172f8cd965497",
+    "download": "https://huggingface.co/datasets/allenai/objaverse/resolve/main/glbs/000-003/725065392aad4b04b7a172f8cd965497.glb",
+    "mirror": "Objaverse (allenai/objaverse on Hugging Face), the model's own Sketchfab glTF export",
+    "md5": "409809431baee8d03401c27f3eaeee30",
+    "licence": "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)",
+    "credit": "Horse: \"HORSE [DRAFT HORSE]\" by BlueMesh (sketchfab.com/3d-models/725065392aad4b04b7a172f8cd965497), CC BY 4.0; animated and fitted with tack for this ad.",
+    "use": "the rider's mount (src/horse.js): the model, its rig and hair; the canter, saddle cloth and saddle are made in code"
   }
 }

@@ -1,4 +1,5 @@
-// Download the village's CC0 assets (listed in tools/assets.json) into assets/, and bake the sky.
+// Download the village's CC0 assets and the horse (CC BY 4.0), listed in tools/assets.json, into assets/, and
+// bake the sky.
 //   node tools/fetch-assets.mjs            (idempotent: files already there with the right checksum are kept,
 //                                           the sky is baked again only when its settings change)
 //   node tools/fetch-assets.mjs --bake-sky (bake the sky again anyway)
@@ -426,35 +427,24 @@ const got = await pool(jobs);
 log(`textures and models: ${got.filter(Boolean).length} downloaded, ${got.filter((g) => !g).length} already there`);
 for (const a of MANIFEST.atlases) await ambientAtlas(a);
 await bakeSky();
+
+// ------------------------------------------------------------------------------------------- the horse
+// "HORSE [DRAFT HORSE]" by BlueMesh (CC BY 4.0, credit required: tools/assets.json horse.credit), the model's
+// own Sketchfab glTF export as mirrored in Objaverse. Used by src/horse.js.
+{
+  const h = MANIFEST.horse;
+  const file = path.join(OUT, 'models/DraftHorse.glb');
+  log((await download(h.download, file, h.md5)) ? 'got' : 'kept', rel(file));
+}
+
 fs.writeFileSync(path.join(OUT, 'README'), [
-  'Downloaded by tools/fetch-assets.mjs from the sources listed in tools/assets.json. All CC0 1.0 (public domain).',
+  'Downloaded by tools/fetch-assets.mjs from the sources listed in tools/assets.json. All CC0 1.0 (public domain),',
+  `except models/DraftHorse.glb: ${MANIFEST.horse.licence}. Credit: ${MANIFEST.horse.credit}`,
   `sky: ${MANIFEST.sky.url}`,
   ...MANIFEST.textures.map((t) => `textures/${t.id}: ${t.url}`),
   ...MANIFEST.models.map((m) => `models/${m.id}: ${m.url}`),
   ...MANIFEST.atlases.map((a) => `atlases/${a.id}: ${a.url}`),
-  'models/Horse.gltf, models/Horse_White.gltf: see src/rider.js',
+  `models/DraftHorse.glb: ${MANIFEST.horse.url}`,
   '',
 ].join('\n'));
 log('done');
-
-// ------------------------------------------------------------------------------------------- the horse
-// Quaternius "Ultimate Animated Animals" (CC0), shared as a Google Drive folder: fetched with gdown
-// (pip install gdown). Only Horse.gltf is used (src/rider.js).
-{
-  const horse = path.join(OUT, 'models/Horse.gltf');
-  if (fs.existsSync(horse)) log('kept', rel(horse));
-  else {
-    const h = MANIFEST.horse;
-    fs.mkdirSync(path.join(OUT, 'cache'), { recursive: true });
-    const tmp = fs.mkdtempSync(path.join(OUT, 'cache/horse-'));
-    const r = spawnSync('gdown', ['--folder', h.download, '-O', tmp], { stdio: 'inherit', timeout: 600000 });
-    const found = [];
-    const walk = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f === 'Horse.gltf') found.push(p); } };
-    walk(tmp);
-    if (!found.length) throw new Error(`horse: download failed (status ${r.status}); install gdown (pip install gdown) or fetch ${h.url} by hand into assets/models/Horse.gltf`);
-    fs.mkdirSync(path.dirname(horse), { recursive: true });
-    fs.copyFileSync(found[0], horse);
-    fs.rmSync(tmp, { recursive: true, force: true });
-    log('got', rel(horse));
-  }
-}
