@@ -1,0 +1,155 @@
+{
+  "about": "Third-party assets for the village ride (src/world.js, src/assets.js). Every one is CC0 1.0 (public domain, https://creativecommons.org/publicdomain/zero/1.0/): free to use, change and ship, no attribution required. `node tools/fetch-assets.mjs` downloads them into assets/ (git-ignored) and bakes the sky from the HDRI.",
+  "licence": "CC0 1.0",
+  "sky": {
+    "id": "kloppenheim_06_puresky",
+    "name": "Kloppenheim 06 (Pure Sky)",
+    "source": "Poly Haven",
+    "url": "https://polyhaven.com/a/kloppenheim_06_puresky",
+    "licence": "CC0 1.0",
+    "use": "sky background (baked from the 16k HDR: a sharp window round the view, a 2k panorama for the rest) and image-based lighting (1k HDR)",
+    "background": "16k",
+    "lighting": "1k",
+    "sunAzimuth": -20,
+    "window": {
+      "az": [
+        -45,
+        45
+      ],
+      "el": [
+        -10,
+        48
+      ]
+    },
+    "exposure": 0.2,
+    "whiteBalance": [
+      1.07,
+      1.0,
+      0.88
+    ],
+    "sunClamp": 6
+  },
+  "textures": [
+    {
+      "id": "cobblestone_floor_04",
+      "res": "2k",
+      "use": "the road",
+      "url": "https://polyhaven.com/a/cobblestone_floor_04"
+    },
+    {
+      "id": "forrest_ground_01",
+      "res": "1k",
+      "use": "grass ground",
+      "url": "https://polyhaven.com/a/forrest_ground_01"
+    },
+    {
+      "id": "grass_path_2",
+      "res": "1k",
+      "use": "road verges, worn ground",
+      "url": "https://polyhaven.com/a/grass_path_2"
+    },
+    {
+      "id": "plastered_wall",
+      "res": "1k",
+      "use": "plaster walls",
+      "url": "https://polyhaven.com/a/plastered_wall"
+    },
+    {
+      "id": "rough_wood",
+      "res": "1k",
+      "use": "timber framing, beams, posts",
+      "url": "https://polyhaven.com/a/rough_wood"
+    },
+    {
+      "id": "weathered_planks",
+      "res": "1k",
+      "use": "doors, stalls, carts, fences, crates",
+      "url": "https://polyhaven.com/a/weathered_planks"
+    },
+    {
+      "id": "castle_brick_01",
+      "res": "1k",
+      "use": "foundations, chimneys, the well",
+      "url": "https://polyhaven.com/a/castle_brick_01"
+    },
+    {
+      "id": "stone_wall",
+      "res": "1k",
+      "use": "town wall, gate, bridge, garden walls",
+      "url": "https://polyhaven.com/a/stone_wall"
+    },
+    {
+      "id": "large_sandstone_blocks_01",
+      "res": "1k",
+      "use": "gate trims, castle",
+      "url": "https://polyhaven.com/a/large_sandstone_blocks_01"
+    },
+    {
+      "id": "clay_roof_tiles_02",
+      "res": "1k",
+      "use": "red tile roofs",
+      "url": "https://polyhaven.com/a/clay_roof_tiles_02"
+    },
+    {
+      "id": "grey_roof_tiles_02",
+      "res": "1k",
+      "use": "slate roofs (tinted blue/teal)",
+      "url": "https://polyhaven.com/a/grey_roof_tiles_02"
+    },
+    {
+      "id": "thatch_roof_angled",
+      "res": "1k",
+      "use": "thatched roofs",
+      "url": "https://polyhaven.com/a/thatch_roof_angled"
+    },
+    {
+      "id": "bark_brown_02",
+      "res": "1k",
+      "use": "tree trunks",
+      "url": "https://polyhaven.com/a/bark_brown_02"
+    }
+  ],
+  "models": [
+    {
+      "id": "wine_barrel_01",
+      "res": "1k",
+      "use": "barrels (the close ones; low-poly ones in the plank texture further off)",
+      "url": "https://polyhaven.com/a/wine_barrel_01"
+    },
+    {
+      "id": "wooden_crate_02",
+      "res": "1k",
+      "use": "crates (the close ones)",
+      "url": "https://polyhaven.com/a/wooden_crate_02"
+    },
+    {
+      "id": "wooden_bucket_01",
+      "res": "1k",
+      "use": "buckets by the well and stalls",
+      "url": "https://polyhaven.com/a/wooden_bucket_01"
+    },
+    {
+      "id": "kite_shield",
+      "res": "1k",
+      "use": "shields on the smithy wall",
+      "url": "https://polyhaven.com/a/kite_shield"
+    }
+  ],
+  "atlases": [
+    {
+      "id": "LeafSet024",
+      "source": "ambientCG",
+      "res": "1K-JPG",
+      "use": "tree canopy leaf clusters",
+      "url": "https://ambientcg.com/a/LeafSet024"
+    }
+  ],
+  "horse": {
+    "name": "Horse (Ultimate Animated Animals, July 2021)",
+    "source": "Quaternius",
+    "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+    "download": "https://drive.google.com/drive/folders/1uJ3N5HfB7jKTseJUNQr3N4YaN0UuEtHk",
+    "licence": "CC0 1.0",
+    "use": "the rider's mount (src/rider.js): Horse.gltf with its Gallop animation"
+  }
+}

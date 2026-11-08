@@ -131,7 +131,7 @@ export class Rider {
       }
     }
     capeGeo.translate(0, -0.65, 0);
-    const capeMat = new THREE.MeshStandardMaterial({ color: C('#8a2232'), roughness: 0.78, side: THREE.DoubleSide });
+    const capeMat = new THREE.MeshStandardMaterial({ color: C('#9a2636'), emissive: C('#3a0a12'), roughness: 0.78, side: THREE.DoubleSide });
     capeMat.onBeforeCompile = (sh) => {
       sh.uniforms.uT = this.capeU.uT;
       sh.vertexShader = sh.vertexShader
@@ -146,7 +146,7 @@ export class Rider {
           vFold = sin(position.x * 16.0 + v * 3.0 + sin(ph) * 1.5) * 0.5 + 0.5;`);
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', '#include <common>\nvarying float vFold;')
-        .replace('#include <color_fragment>', '#include <color_fragment>\n  diffuseColor.rgb *= 0.62 + 0.5 * vFold;');
+        .replace('#include <color_fragment>', '#include <color_fragment>\n  diffuseColor.rgb *= 0.8 + 0.3 * vFold;');
     };
     const cape = new THREE.Mesh(capeGeo, capeMat);
     cape.position.set(0, 0.7, 0.16);

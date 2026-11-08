@@ -10,21 +10,23 @@ footage, samples or stock music. Separate from the rest of this repo.
 | 0.0 | black screen, Spawn's pixel font, a blinking block cursor; `i want to make a game` is typed |
 | 2.5 | enter: a cable's glowing mouth opens behind the words and sucks them in (air rushing in, letters stretched and swallowed); we dive in after them |
 | 3.7 | through the cable, overtaking our own words: twisted glowing strands, data packets streaking past, light at the end |
-| 4.9 | white burst into a dusk MMO-style village: walking a grassy trail between lit cottages, looking up at the sky |
-| 5.9 | prompts typed into a Spawn-style chat bar; each spawns its game's title/loading screen in the sky (pixel dissolve), on the beat |
-| 16.3 | montage: `i want to make a ___ game` flips through 16 genres, the sky fills with games |
+| 4.9 | white burst into an MMO quest-hub village at golden hour: a hooded rider on a horse canters through the town gate and down the street (third person, HUD: player frame, minimap, quest tracker) |
+| 5.9 | prompts typed in a chat bubble above the rider; each game's title/loading screen spawns ahead in the sky (pixel dissolve, on the beat) and you ride under it, its prompt as a caption |
+| 16.3 | montage: 16 more prompts type all over the sky at once and their games pour past overhead |
 | 21.0 | `i want to make anything`, enter: the world drains into a vortex |
 | 22.9 | back out through the same cable, backwards; the cable end shrinks into the cursor |
 | 25.4 | `create with SpawnAI`; the cursor turns into Spawn's sparkle; the logo + spawn.co |
 
 Every game shown is made up (names, logos, characters); they evoke genres (fighting, military shooter, space
-social deduction, racing, horror...) without copying any real game. Spawn's own brand comes from its site:
+social deduction, racing, horror...) without copying any real game. The village uses CC0 assets only (Poly Haven
+sky and PBR textures and props, an ambientCG leaf set, the Quaternius horse), listed in `tools/assets.json`. Spawn's own brand comes from its site:
 Geist Pixel Square (the `geist` npm package, OFL), `#070708`, white, peach `#ffd9a0`, teal `#1d96a0`.
 
 ## Make it
 ```
 npm install                      # three, geist, @fontsource/* display fonts
-pip install numpy scipy pyloudnorm
+pip install numpy scipy pyloudnorm gdown
+node tools/fetch-assets.mjs      # CC0 sky, textures, models and the horse into assets/ (git-ignored, ~250 MB)
 npm run audio                    # build/timeline.json -> build/audio.wav (-14 LUFS, <= -1 dBTP)
 npm run preview                  # 540x960 check, ~6 min
 npm run render                   # build/spawn-ad-1080x1920.mp4
@@ -39,6 +41,8 @@ Chromium and Playwright must be installed (the render uses SwiftShader, so no GP
 - `src/main.js`: renderer, post chain (bloom + `src/post.js`: vortex/pinch, radial blur, aberration, flash,
   grain, dither, overlay composite) and `window.ad` used by the render scripts.
 - `src/overlay.js`: everything typed (opening, chat bar, montage reel, streaks, end card).
-- `src/tunnel.js`, `src/world.js`, `src/panels.js`: the cable, the village walk, the floating title screens.
+- `src/tunnel.js`: the cable. `src/world.js`, `src/village.js`, `src/assets.js`: the village. `src/ride.js`,
+  `src/rider.js`: the road, the follow camera, the horse and rider. `src/panels.js`, `src/promptcard.js`: the
+  chat bubble, the floating title screens and their prompts.
 - `src/screens/*.js`: one module per made-up game (`BRIEF.md` has the rules), drawn with Canvas2D.
 - `render/`: static server, stills, and the video renderer (parallel jobs, then one x264 encode + audio).
