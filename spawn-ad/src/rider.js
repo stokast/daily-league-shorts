@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { Horse } from './horse.js';
 import { riderPose, RIDE_SPEED } from './ride.js';
-import { W0 } from './timeline.js';
+import { W0, CANTER } from './timeline.js';
 
 const C = (hex) => new THREE.Color(hex);
 const HORSE_SCALE = 0.88; // world metres per model unit: ~1.65 m at the withers
@@ -233,7 +233,7 @@ export class Rider {
   update(t) {
     if (!this.mount?.ready) return;
     const { pos, yaw } = riderPose(t);
-    this.mount.update(Math.max(0, t - W0) + 0.21, pos, yaw, RIDE_SPEED);
+    this.mount.update(Math.max(0, t - W0) + CANTER.offset, pos, yaw, RIDE_SPEED);
     // the rider sits the canter: follows the saddle, but takes only half its rocking
     const { pos: seat, quat } = this.mount.seat(this._v, this._q);
     const g = this.riderGroup;

@@ -5,7 +5,7 @@ import * as TL from '../src/timeline.js';
 const out = process.argv[2] || 'build/timeline.json';
 fs.mkdirSync(path.dirname(out), { recursive: true });
 const data = {
-  fps: TL.FPS, duration: TL.DURATION, bpm: TL.BPM, beat: TL.BEAT, w0: TL.W0,
+  fps: TL.FPS, duration: TL.DURATION, bpm: TL.BPM, beat: TL.BEAT, w0: TL.W0, canter: TL.CANTER,
   open: TL.OPEN, in: TL.IN, prompts: TL.PROMPTS, montage: TL.MONTAGE, climax: TL.CLIMAX, out: TL.OUT, end: TL.END,
   events: TL.events(),
 };

@@ -558,13 +558,48 @@ def send_chime():
     return out
 
 
+def felt(note, dur=2.2, bright=0.55):
+    """A soft felt-piano note: warm partials that fade from the top down, a hint of hammer."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = midi(note)
+    x = np.zeros(n)
+    for k, a in enumerate([1.0, 0.38, 0.2, 0.1, 0.05, 0.025], start=1):
+        fk = f * k * np.sqrt(1 + 0.00035 * k * k)  # a little stretch, like a real string
+        x += a * np.sin(2 * np.pi * fk * t + 0.4 * k) * np.exp(-t / (1.5 / (1 + 0.7 * (k - 1))))
+    x *= np.minimum(1, t / 0.006)
+    x = sweep(x, 'low', 600 + 2600 * bright * np.exp(-t / 0.35), block=128)
+    hammer = filt(noise(n), 'low', 900) * np.exp(-t / 0.01) * 0.06
+    return x + hammer
+
+
+# On the black screens the typing is not clicked out letter by letter: a soft note lands on a word as it
+# starts, rising through F major into what comes next (the send chime, the sparkle's bells).
+WORD_NOTES = {
+    'open': {'want': 72, 'make': 77, 'game': 81},  # C5 F5 A5, then the chime's C6 F6
+    'end': {'create': 77, 'with': 81, 'SpawnAI': 84},  # F5 A5 C6, then the sparkle's F6 A6 C7
+}
+for tag, notes in WORD_NOTES.items():
+    ks = [e for e in ev if e['type'] == 'key' and e['tag'] == tag]
+    text = ''.join(e['ch'] for e in ks)
+    pos = 0
+    for word in text.split(' '):
+        i = text.index(word, pos)
+        pos = i + len(word)
+        if word in notes:
+            at = ks[i]['t'] - 0.004
+            lvl = -27.0 if word != 'SpawnAI' else -25.5
+            note = felt(notes[word])
+            keys.add(note, at, lvl, {'want': -0.12, 'make': 0.0, 'game': 0.12, 'create': -0.12, 'with': 0.0, 'SpawnAI': 0.1}[word])
+            verb_send.add(pan2(note), at, lvl - 4.0)
+
 typed = {'open': 0, 'end': 0, 'world': 0, 'fast': 0, 'montage': 0}
 for e in ev:
     if e['type'] == 'key':
         tag = e['tag']
         i = typed[tag]
         typed[tag] += 1
-        if e['ch'] == ' ':
+        if e['ch'] == ' ' or tag in ('open', 'end'):
             continue
         # thin out fast typing so it stays a sparkle, not a buzz
         if tag == 'fast' and i % 2:
@@ -572,15 +607,13 @@ for e in ev:
         if tag == 'montage' and i % 3:
             continue
         note = PENTA[(ord(e['ch']) * 5 + i) % len(PENTA)]
-        if tag in ('open', 'end'):
-            note -= 12  # warmer on the black screen
-        else:
-            note += 12  # over the music, an octave above the arp so it sparkles on top
-        lvl = {'open': -9.5, 'end': -9.5, 'world': -17.0, 'fast': -20.0, 'montage': -27.0}[tag]
-        keys.add(text_blip(note, 0.8 if tag in ('open', 'end') else 1.0), e['t'] - 0.002, lvl, ((i % 5) - 2) * 0.08)
+        note += 12  # over the music, an octave above the arp so it sparkles on top
+        lvl = {'world': -17.0, 'fast': -20.0, 'montage': -27.0}[tag]
+        keys.add(text_blip(note), e['t'] - 0.002, lvl, ((i % 5) - 2) * 0.08)
     elif e['type'] == 'enter':
         if e['tag'] == 'open':
-            keys.add(send_chime(), e['t'], -14.0)
+            keys.add(send_chime(), e['t'], -22.0)
+            verb_send.add(pan2(send_chime()), e['t'], -27.0)
         else:
             keys.add(send_chime(), e['t'], -19.0)
             fx.add(whoosh(0.16, 1500, 7000, 1.5, 'swell'), e['t'], -26.0)
@@ -619,12 +652,11 @@ vac_n = int((s1 - s0 + 0.08) * SR)
 vu = np.linspace(0, 1, vac_n)
 vac = filt(saw(46 + 30 * vu ** 2, vac_n) + saw(46.4 + 30 * vu ** 2, vac_n), 'low', 260) * vu ** 1.6
 fx.add(vac, s0, -18.0)
-# each letter swallowed: a tiny blip, rising
-n_letters = 19
-for k in range(n_letters):
-    bt = sw0 + (sw1 - sw0) * k / (n_letters - 1)
-    b = pluck(84 + k * 0.9, 0.06, 'tri') * 0.7
-    fx.add(b, bt, -27.0 + k * 0.25, ((k % 2) - 0.5) * 0.4)
+# the letters going in: one soft rising glint (not a blip per letter)
+gz_n = int((sw1 - sw0 + 0.12) * SR)
+gu = np.linspace(0, 1, gz_n)
+glint = sine(1400 * (2.6 ** gu), gz_n) * np.sin(np.pi * gu) ** 1.5 * (0.7 + 0.3 * np.sin(2 * np.pi * 26 * gu * (sw1 - sw0 + 0.12)))
+fx.add(pan2(glint, 0.0), sw0, -31.0)
 # gulp as the last one goes in
 gl_n = int(0.35 * SR)
 gt = np.arange(gl_n) / SR
@@ -698,7 +730,31 @@ def footstep(seed):
     return thud * 0.7 + crunch * 0.55
 
 
-# (no footsteps: the walk is a smooth glide)
+# hoofbeats: the canter's three-beat on the cobbles (left hind; right hind with left fore; the leading right fore),
+# on the frames the hooves land (TL['canter'] is what src/horse.js poses)
+def hoof(seed, strength=1.0):
+    rr = np.random.default_rng(seed)
+    n = int(0.18 * SR)
+    t = np.arange(n) / SR
+    thud = np.sin(2 * np.pi * (88 + 70 * np.exp(-t / 0.008)) * t) * np.exp(-t / 0.04)
+    clack = filt(rr.standard_normal(n), 'band', [700, 3000]) * np.exp(-t / 0.009)
+    ring = sum(np.sin(2 * np.pi * f * (1 + 0.04 * rr.standard_normal()) * t) * np.exp(-t / d) * a
+               for f, a, d in [(1250, 0.22, 0.025), (2100, 0.12, 0.018), (3300, 0.06, 0.012)])
+    grit = filt(rr.standard_normal(n), 'high', 3500) * np.exp(-t / 0.03) * 0.08
+    return (thud * 0.9 + clack * 0.55 + ring + grit) * strength
+
+
+CAN = TL['canter']
+hoof_end = vortex0 + 0.35
+for k in range(200):
+    for leg, td in CAN['td'].items():
+        ht = W0 - CAN['offset'] + (k + td) * CAN['period']
+        if ht < W0 - 0.02 or ht > hoof_end:
+            continue
+        fade = min(1.0, (ht - W0 + 0.05) / 0.4) * min(1.0, max(0.0, (hoof_end - ht) / 0.45))
+        lead = 1.15 if leg == 'RF' else 1.0  # the leading fore lands hardest
+        pan = (-0.18 if leg[0] == 'L' else 0.18) + (0.05 if leg[1] == 'F' else -0.05)
+        fx.add(pan2(hoof(k * 4 + 'LH RH LF RF'.split().index(leg), lead * fade), pan), ht, -19.0)
 
 # dusk crickets, very low, across the walk
 cr_n = int((vortex0 - W0) * SR)

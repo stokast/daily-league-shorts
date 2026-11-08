@@ -7,6 +7,7 @@
 // The model sits in `flip`, which turns it to face +z and scales it; `root` is placed on the road.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { CANTER } from './timeline.js';
 
 const boneName = (n) => (n === 0 ? 'Bone_Armature' : `Bone${String(n).padStart(3, '0')}_Armature`);
 
@@ -27,8 +28,8 @@ const RIG = {
 
 // the canter (phases are fractions of a stride; LH lands first, then the diagonal pair, then the lead foreleg)
 export const GAIT = {
-  period: 0.64, // s per stride
-  td: { LH: 0.0, RH: 0.19, LF: 0.21, RF: 0.38 },
+  period: CANTER.period, // s per stride
+  td: CANTER.td,
   duty: { front: 0.34, hind: 0.37 }, // fraction of the stride a hoof is on the ground
   ahead: { front: 0.62, hind: 0.5 }, // where a hoof lands: this much of the stance length ahead of where it stands at rest
   lift: { front: 0.4, hind: 0.27 }, // how high the fetlock rises in the swing (native units)

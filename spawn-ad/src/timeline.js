@@ -60,6 +60,9 @@ export const IN = {
 export const W0 = IN.flash; // music downbeat
 export const beat = (k) => W0 + k * BEAT;
 export const WORLD = { start: W0, barIn: beat(1.5) };
+// The horse's right-lead canter: src/horse.js poses it, audio/make_audio.py puts hoofbeats on its footfalls.
+// Phase = (t - W0 + offset) / period; each hoof lands at its td phase.
+export const CANTER = { period: 0.64, offset: 0.21, td: { LH: 0.0, RH: 0.19, LF: 0.21, RF: 0.38 } };
 
 // Hero/mid prompts: each is a prompt card floating in the air that types itself; its game's screen
 // lands above it on the `impact` beat. The card appears `cardIn` (a moment before the first key).
