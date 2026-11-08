@@ -74,10 +74,17 @@ node gpu-render/pack.mjs <project dir> --audio <soundtrack.wav> --name <name> --
 | `--out` | `gpu-render/dist/<name>` | output folder (git-ignored) |
 | `--keep-css` | off | keep the project page's own `<style>` (normally dropped: the render page has its own) |
 
+An artifact serves only some file types: pages, scripts, JSON and text, common images, fonts, and
+mp3/wav/ogg/mp4/webm. Pack handles the rest:
+- Text files of other types (`.gltf`, shaders) are published as `text/plain` under their own names.
+- Binary files of other types (`.glb`, `.bin`, `.hdr`, the `.aac` soundtrack) are gzipped where that helps and
+  written as base64 text parts. `runtime/shim.js` rebuilds each one in the page when the project fetches its
+  original URL, so the project's code doesn't change.
+
 Pack reports the bundle's size and checks it against artifact limits. Each file can be at most 15 MB (16 MB
 for text), and each version 256 MB and 511 files. It also lists anything loaded from other hosts, which won't
 work once published. For the Spawn ad, `npm run gpu-pack` in `spawn-ad/` packs it after `npm run audio`
-(about 60 MB, one batch).
+(54 MB in one batch; its 14 MB horse model gzips well).
 
 ## Publish (for Claude)
 
@@ -86,7 +93,8 @@ work once published. For the Spawn ad, `npm run gpu-pack` in `spawn-ad/` packs i
 1. First call:
    - `file_path`: `gpu-render/dist/<name>/index.html`
    - `root`: `gpu-render/dist/<name>`
-   - `files`: the first batch, as a list of paths
+   - `files`: the first batch, exactly as listed (a map from published path to source, where text of other
+     types carries `contentType: "text/plain"`)
    - `capabilities`: `{ "downloads": true }`
    - `icon`: `"video"`
    - `description`: one sentence saying what renders.
@@ -98,6 +106,16 @@ work once published. For the Spawn ad, `npm run gpu-pack` in `spawn-ad/` packs i
 
 The page needs no other capability. Without `downloads` the save button can't save inside claude.ai, because
 the viewer's frame blocks ordinary downloads.
+
+## Check page
+
+A private check page built from the demo is at https://claude.ai/artifact/7tcwdM9d8t7Ti3b8seTowE.
+1. Open it in Chrome or Edge on the computer that will render.
+2. Press **Render video**, then **Save video**.
+
+The result is a 4-second MP4 with a white flash and a click on every second. The Encoder line says whether
+the GPU's own encoder is in use. To rebuild the page, pack `demo/` with any short soundtrack and publish it to
+that link.
 
 ## What comes out
 
@@ -148,7 +166,9 @@ not the speed: 0.3 frames/s for the Spawn ad here, against tens of frames per se
 - `runtime/harness.js`: the render page's engine and controls.
 - `runtime/mp4.js`: the MP4 writer (H.264 + AAC, interleaved, edit lists, colour tags).
 - `runtime/adts.js`: reads the AAC soundtrack.
-- `runtime/shim.js`: answers `fetch()` of `blob:` and `data:` URLs from memory. three.js fetches the textures
-  inside `.glb` models that way, and an artifact's policy may not allow the fetch.
+- `runtime/shim.js`: runs before the project. It rebuilds the files pack carried as text when they're
+  fetched, and answers `fetch()` of `blob:` and `data:` URLs from memory: three.js fetches the textures inside
+  `.glb` models that way, and an artifact's policy may not allow the fetch. Pack writes the table of carried
+  files next to it as `packed.js`.
 - `demo/`: a dependency-free WebGL2 test project.
 - `test/e2e.mjs`: the end-to-end test.

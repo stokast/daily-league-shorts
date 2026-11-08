@@ -12,13 +12,18 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import zlib from 'node:zlib';
 import { createRequire } from 'node:module';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const LIMITS = { file: 15 * 1024 * 1024, text: 16 * 1024 * 1024, batch: 60 * 1024 * 1024, batchFiles: 250, total: 256 * 1024 * 1024, files: 511 };
 const TEXT = new Set(['.js', '.mjs', '.css', '.json', '.html', '.htm', '.txt', '.svg', '.glsl', '.md', '.csv']);
+// file types a published artifact serves (anything else must be carried as one of these)
+const SERVED = new Set(['.html', '.css', '.js', '.mjs', '.wasm', '.json', '.map', '.geojson', '.webmanifest', '.txt', '.md', '.csv', '.xml',
+  '.svg', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.ico', '.woff', '.woff2', '.ttf', '.otf', '.mp3', '.wav', '.ogg', '.mp4', '.webm', '.pdf']);
+const PART = 12_000_000; // characters of base64 per text part (an artifact text file can be 16 MB)
 const TYPES = {
-  '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css',
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css',
   '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml', '.webp': 'image/webp', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.hdr': 'application/octet-stream',
   '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.aac': 'audio/aac',
@@ -166,7 +171,7 @@ for (const p of files) {
   else fs.copyFileSync(src, dst);
 }
 
-// the runtime
+// the runtime (packed.js, the table of carried files, is written below)
 fs.mkdirSync(path.join(OUT, 'gpu-render'), { recursive: true });
 for (const f of ['harness.js', 'mp4.js', 'adts.js', 'shim.js']) fs.copyFileSync(path.join(HERE, 'runtime', f), path.join(OUT, 'gpu-render', f));
 
@@ -181,6 +186,47 @@ if (AUDIO) {
   }
   audioInfo = 'AAC 48 kHz stereo, 256 kbit/s';
 }
+
+// ------------------------------------------------------------------------------------------------ carry unserved files
+// An artifact serves only some file types. Text of other types (.gltf, shaders) is published as text/plain under
+// its own name; binaries of other types (.glb, .bin, .hdr, the .aac) are gzipped when that helps, written as
+// base64 text parts, and rebuilt in the page by runtime/shim.js when the project fetches the original URL.
+const isText = (buf) => {
+  if (buf.includes(0)) return false;
+  try { new TextDecoder('utf-8', { fatal: true }).decode(buf); return true; } catch { return false; }
+};
+const packed = {};
+const asText = new Set();
+const bundleFiles = [];
+const walkOut = (d) => {
+  for (const f of fs.readdirSync(d)) {
+    const p = path.join(d, f);
+    if (fs.statSync(p).isDirectory()) walkOut(p);
+    else bundleFiles.push(path.relative(OUT, p).split(path.sep).join('/'));
+  }
+};
+walkOut(OUT);
+for (const rp of bundleFiles) {
+  const ext = path.extname(rp).toLowerCase();
+  if (SERVED.has(ext)) continue;
+  const full = path.join(OUT, rp);
+  const buf = fs.readFileSync(full);
+  if (isText(buf)) { asText.add(rp); continue; }
+  const gz = zlib.gzipSync(buf, { level: 9 });
+  const useGzip = gz.length < buf.length * 0.95;
+  const b64 = (useGzip ? gz : buf).toString('base64');
+  const parts = [];
+  for (let i = 0; i * PART < b64.length; i++) {
+    const name = `${rp}.part${i}.txt`;
+    fs.writeFileSync(path.join(OUT, name), b64.slice(i * PART, (i + 1) * PART));
+    parts.push(name);
+  }
+  fs.rmSync(full);
+  packed[rp] = { parts, gzip: useGzip, size: buf.length, type: TYPES[ext] || 'application/octet-stream' };
+}
+fs.writeFileSync(path.join(OUT, 'gpu-render', 'packed.js'),
+  `// Files carried as base64 text parts (an artifact doesn't serve their types); runtime/shim.js rebuilds them.\nexport const PACKED = ${JSON.stringify(packed, null, 1)};\n`);
+if (Object.keys(packed).length) console.log(`  carried as text: ${Object.keys(packed).map((k) => `${k} (${(packed[k].size / 1048576).toFixed(1)} MB${packed[k].gzip ? ', gzipped' : ''})`).join(', ')}`);
 
 // ------------------------------------------------------------------------------------------------ 3. the page
 const projectHtml = fs.readFileSync(path.join(ROOT, PAGE), 'utf8');
@@ -220,6 +266,7 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 24px;
 }
+[hidden] { display: none !important; }
 body > canvas { position: fixed; left: -100000px; top: 0; width: 1px !important; height: 1px !important; }
 .gr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 23rem); gap: 28px; max-width: 66rem; margin: 0 auto; align-items: start; }
 @media (max-width: 760px) { .gr { grid-template-columns: minmax(0, 1fr); } }
@@ -260,10 +307,10 @@ ${keptCss}
   <section class="gr-panel">
     <p class="gr-eyebrow">GPU render</p>
     <h1>${esc(TITLE.replace(/\s+Render$/, ''))}</h1>
-    <p id="gr-status" class="gr-status" data-tone="busy">Loading the project…</p>
+    <p id="gr-status" class="gr-status" data-tone="busy">Loading the project&hellip;</p>
     <p id="gr-detail" class="gr-detail">Starting</p>
     <dl class="gr-specs">
-      <dt>Video</dt><dd>${W} × ${H}, ${FPS} fps, ${DUR} s (${frames} frames)</dd>
+      <dt>Video</dt><dd>${W}&times;${H}, ${FPS} fps, ${DUR} s (${frames} frames)</dd>
       <dt>Sound</dt><dd>${esc(audioInfo || 'none')}</dd>
       <dt>Graphics</dt><dd id="gr-gpu">checking</dd>
       <dt>Encoder</dt><dd id="gr-encoder">checking</dd>
@@ -314,13 +361,17 @@ for (const f of all) {
 const total = all.reduce((s, f) => s + f.size, 0);
 if (total > LIMITS.total) problems.push(`the bundle is ${(total / 1048576).toFixed(0)} MB (an artifact version can hold ${LIMITS.total / 1048576} MB)`);
 if (all.length > LIMITS.files) problems.push(`the bundle has ${all.length} files (an artifact version can hold ${LIMITS.files})`);
+// each batch is the `files` map for one Artifact publish: path -> path, or {from, contentType} for text sent as text/plain
 const batches = [];
-let cur = [], curSize = 0;
+let cur = {}, curN = 0, curSize = 0;
 for (const f of all.filter((f) => f.path !== 'index.html').sort((a, b) => a.path.localeCompare(b.path))) {
-  if (cur.length && (curSize + f.size > LIMITS.batch || cur.length >= LIMITS.batchFiles)) { batches.push(cur); cur = []; curSize = 0; }
-  cur.push(f.path); curSize += f.size;
+  if (curN && (curSize + f.size > LIMITS.batch || curN >= LIMITS.batchFiles)) { batches.push(cur); cur = {}; curN = 0; curSize = 0; }
+  cur[f.path] = asText.has(f.path) ? { from: f.path, contentType: 'text/plain' } : f.path;
+  curN++; curSize += f.size;
 }
-if (cur.length) batches.push(cur);
+if (curN) batches.push(cur);
+const unserved = all.filter((f) => !SERVED.has(path.extname(f.path).toLowerCase()) && !asText.has(f.path) && f.path !== 'publish.json');
+for (const f of unserved) problems.push(`${f.path} is a type an artifact doesn't serve`);
 fs.writeFileSync(path.join(OUT, 'publish.json'), JSON.stringify({ page: 'index.html', title: TITLE, capabilities: { downloads: true }, batches, files: all.length, bytes: total }, null, 2));
 
 console.log(`  ${files.length} project files (${tops.join(', ')}), ${all.length} in the bundle, ${(total / 1048576).toFixed(1)} MB, ${batches.length} publish batch(es)`);
